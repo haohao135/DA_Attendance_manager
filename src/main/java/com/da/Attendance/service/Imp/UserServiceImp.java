@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +41,10 @@ public class UserServiceImp implements UserService {
                 userRegisterRequest.getFullName(),
                 userRegisterRequest.getEmail()
         );
-        user.setUserRole(UserRole.USER);
+        if (user.getUserRole() == null) {
+            user.setUserRole(new ArrayList<>());
+        }
+        user.getUserRole().add(UserRole.USER);
         userRepository.save(user);
         return new UserRegisterResponse(user.getEmail(), user.getFullName());
     }
@@ -56,7 +60,7 @@ public class UserServiceImp implements UserService {
         User user = userRepository.findByEmail(userLoginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("user not found"));
         return new UserLoginResponse(
-                user.getFullName(), jwtUtil.generateToken(user.getEmail(), user.getUserRole().toString())
+                user.getFullName(), jwtUtil.generateToken(user.getEmail(), user.getUserRole())
         );
     }
 
@@ -115,7 +119,14 @@ public class UserServiceImp implements UserService {
     @Override
     public void changeRole(String id, UserRole userRole) {
         User user = getUserById(id);
-        user.setUserRole(userRole);
+        user.getUserRole().add(userRole);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void deleteRole(String id, UserRole userRole) {
+        User user = getUserById(id);
+        user.getUserRole().remove(userRole);
         userRepository.save(user);
     }
 

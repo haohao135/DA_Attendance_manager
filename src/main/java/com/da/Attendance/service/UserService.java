@@ -21,5 +21,6 @@ public interface UserService {
     List<User> getAllUser();
     List<User> getUserByRole(UserRole userRole);
     void changeRole(String id, UserRole userRole);
+    void deleteRole(String id, UserRole userRole);
     void deleteUserById(String id);
 }

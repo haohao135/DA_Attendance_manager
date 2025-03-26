@@ -1,21 +1,23 @@
 package com.da.Attendance.security;
 
+import com.da.Attendance.model.enums.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
 
 @Component
 public class JwtUtil {
     private final String SECRET_KEY = "anhvietdepchainhatvietnamhawdjhiwbadhiawhidhiwhida";
 
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, List<UserRole> roles) {
         return Jwts.builder()
                 .setSubject(email)
-                .claim("role", role)
+                .claim("role", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)

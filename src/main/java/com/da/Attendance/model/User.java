@@ -5,6 +5,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Document
 public class User {
@@ -15,7 +17,7 @@ public class User {
     private String numberPhone;
     private String email;
     private String avatarId;
-    private UserRole userRole = UserRole.USER;
+    private List<UserRole> userRole = new ArrayList<>();
     private Instant createAt = Instant.now();
     public User() {}
 
@@ -25,7 +27,7 @@ public class User {
         this.email = email;
     }
 
-    public User(String id, String password, String fullName, String numberPhone, String email, String avatarId, UserRole userRole, Instant createAt) {
+    public User(String id, String password, String fullName, String numberPhone, String email, String avatarId, List<UserRole> userRole, Instant createAt) {
         this.id = id;
         this.password = password;
         this.fullName = fullName;
@@ -84,11 +86,11 @@ public class User {
         this.avatarId = avatarId;
     }
 
-    public UserRole getUserRole() {
+    public List<UserRole> getUserRole() {
         return userRole;
     }
 
-    public void setUserRole(UserRole userRole) {
+    public void setUserRole(List<UserRole> userRole) {
         this.userRole = userRole;
     }
 
