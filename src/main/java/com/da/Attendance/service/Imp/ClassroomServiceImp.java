@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,11 +22,16 @@ public class ClassroomServiceImp implements ClassroomService {
     }
 
     @Override
-    public Classroom addClass(String className) {
+    public List<Classroom> findByStudentId(String studentId) {
+        return classroomRepository.findByStudentIdsContaining(studentId);
+    }
+
+    @Override
+    public Classroom addClass(String className, String classId) {
         if (className == null || className.isBlank()) {
             throw new IllegalArgumentException("class name cannot be null or empty");
         }
-        Classroom classroom = new Classroom(className);
+        Classroom classroom = new Classroom(className, classId);
         return classroomRepository.save(classroom);
     }
 
@@ -71,6 +77,19 @@ public class ClassroomServiceImp implements ClassroomService {
             return classroomRepository.save(classroom);
         }
         throw new RuntimeException("student already exists in the class");
+    }
+
+    @Override
+    public Classroom addStudents(String id, List<String> studentIds) {
+        Classroom classroom = findClassById(id);
+        List<String> currentStudents = classroom.getStudentIds();
+        for (String studentId : studentIds) {
+            if (!currentStudents.contains(studentId)) {
+                currentStudents.add(studentId);
+            }
+        }
+        classroom.setStudentIds(currentStudents);
+        return classroomRepository.save(classroom);
     }
 
     @Override

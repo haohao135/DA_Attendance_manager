@@ -7,6 +7,7 @@ import com.da.Attendance.dto.response.User.UserLoginResponse;
 import com.da.Attendance.dto.response.User.UserRegisterResponse;
 import com.da.Attendance.model.User;
 import com.da.Attendance.model.enums.UserRole;
+import com.da.Attendance.model.enums.UserStatus;
 import com.da.Attendance.repository.UserRepository;
 import com.da.Attendance.security.JwtUtil;
 import com.da.Attendance.service.UserService;
@@ -41,6 +42,7 @@ public class UserServiceImp implements UserService {
                 userRegisterRequest.getFullName(),
                 userRegisterRequest.getEmail()
         );
+        user.setUserStatus(UserStatus.ACTIVE);
         if (user.getUserRole() == null) {
             user.setUserRole(new ArrayList<>());
         }
@@ -59,6 +61,9 @@ public class UserServiceImp implements UserService {
         }
         User user = userRepository.findByEmail(userLoginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("user not found"));
+        if(user.getUserStatus() == UserStatus.LOCK){
+            throw new RuntimeException("account is locked");
+        }
         return new UserLoginResponse(
                 user.getFullName(), jwtUtil.generateToken(user.getEmail(), user.getUserRole())
         );

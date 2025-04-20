@@ -12,18 +12,21 @@ public class Classroom {
     private String id;
     private String className;
     private String teacherId;
+    private String classId;
     private List<String> studentIds = new ArrayList<>();
 
     public Classroom() {}
 
-    public Classroom(String className) {
+    public Classroom(String className, String classId) {
         this.className = className;
+        this.classId = classId;
     }
 
-    public Classroom(String id, String className, String teacherId, List<String> studentIds) {
+    public Classroom(String id, String className, String teacherId, String classId, List<String> studentIds) {
         this.id = id;
         this.className = className;
         this.teacherId = teacherId;
+        this.classId = classId;
         this.studentIds = studentIds;
     }
 
@@ -57,5 +60,13 @@ public class Classroom {
 
     public void setStudentIds(List<String> studentIds) {
         this.studentIds = studentIds;
+    }
+
+    public String getClassId() {
+        return classId;
+    }
+
+    public void setClassId(String classId) {
+        this.classId = classId;
     }
 }

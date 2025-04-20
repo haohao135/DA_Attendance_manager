@@ -2,22 +2,18 @@ package com.da.Attendance.dto.request.Event;
 
 import java.time.Instant;
 
-public class AddEventRequest {
+public class UpdateEventRequest {
     private String nameEvent;
     private String description;
     private String location;
-    private Instant dateTime;
-    private String organizerId;
 
-    public AddEventRequest() {
+    public UpdateEventRequest() {
     }
 
-    public AddEventRequest(String nameEvent, String description, String location, Instant dateTime, String organizerId) {
+    public UpdateEventRequest(String nameEvent, String description, String location) {
         this.nameEvent = nameEvent;
         this.description = description;
         this.location = location;
-        this.dateTime = dateTime;
-        this.organizerId = organizerId;
     }
 
     public String getNameEvent() {
@@ -42,21 +38,5 @@ public class AddEventRequest {
 
     public void setLocation(String location) {
         this.location = location;
-    }
-
-    public Instant getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(Instant dateTime) {
-        this.dateTime = dateTime;
-    }
-
-    public String getOrganizerId() {
-        return organizerId;
-    }
-
-    public void setOrganizerId(String organizerId) {
-        this.organizerId = organizerId;
     }
 }

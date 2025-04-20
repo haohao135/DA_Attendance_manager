@@ -1,6 +1,7 @@
 package com.da.Attendance.model;
 
 import com.da.Attendance.model.enums.UserRole;
+import com.da.Attendance.model.enums.UserStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,6 +18,7 @@ public class User {
     private String numberPhone;
     private String email;
     private String avatarId;
+    private UserStatus userStatus;
     private List<UserRole> userRole = new ArrayList<>();
     private Instant createAt = Instant.now();
     public User() {}
@@ -100,5 +102,13 @@ public class User {
 
     public void setCreateAt(Instant createAt) {
         this.createAt = createAt;
+    }
+
+    public UserStatus getUserStatus() {
+        return userStatus;
+    }
+
+    public void setUserStatus(UserStatus userStatus) {
+        this.userStatus = userStatus;
     }
 }

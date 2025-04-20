@@ -21,14 +21,21 @@ public class Event {
     public Event() {
     }
 
-    public Event(String id, String nameEvent, String description, String location, Instant dateTime, String organizerId, List<String> participantIds) {
+    public Event(String nameEvent, String description, String location, Instant dateTime, String organizerId) {
+        this.nameEvent = nameEvent;
+        this.description = description;
+        this.location = location;
+        this.dateTime = dateTime;
+        this.organizerId = organizerId;
+    }
+
+    public Event(String id, String nameEvent, String description, String location, Instant dateTime, String organizerId) {
         this.id = id;
         this.nameEvent = nameEvent;
         this.description = description;
         this.location = location;
         this.dateTime = dateTime;
         this.organizerId = organizerId;
-        this.participantIds = participantIds;
     }
 
     public String getId() {

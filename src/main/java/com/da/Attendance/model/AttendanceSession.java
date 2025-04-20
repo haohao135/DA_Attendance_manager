@@ -14,5 +14,7 @@ public class AttendanceSession {
     private String classId;
     private Instant dateTime;
     private AttendanceMethod method;
+    private double latitude;
+    private double longtitude;
     List<String> attendanceRecordsStudentId;
 }

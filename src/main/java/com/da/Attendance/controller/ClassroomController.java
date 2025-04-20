@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/class")
 @CrossOrigin("*")
@@ -25,10 +27,21 @@ public class ClassroomController {
                     .body(new ApiResponse("Get class failed " + e.getMessage(), null));
         }
     }
-    @PostMapping("/add")
-    public ResponseEntity<ApiResponse> addClass(@RequestParam String className){
+    @GetMapping("/student")
+    public ResponseEntity<ApiResponse> getByStudentId(@RequestParam String id){
         try{
-            Classroom classroom = classroomService.addClass(className);
+            List<Classroom> classrooms = classroomService.findByStudentId(id);
+            return ResponseEntity.ok(new ApiResponse("Get class success", classrooms));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Get class failed " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/add")
+    public ResponseEntity<ApiResponse> addClass(@RequestParam String className,
+                                                @RequestParam String classId){
+        try{
+            Classroom classroom = classroomService.addClass(className, classId);
             return ResponseEntity.ok(new ApiResponse("Add class success", classroom));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -73,6 +86,16 @@ public class ClassroomController {
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Add student failed " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/{id}/add-students")
+    public ResponseEntity<ApiResponse> addStudents(@PathVariable String id, @RequestBody List<String> studentIds){
+        try{
+            Classroom classroom = classroomService.addStudents(id, studentIds);
+            return ResponseEntity.ok(new ApiResponse("Add students success", classroom));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Add students failed " + e.getMessage(), null));
         }
     }
     @PostMapping("/{id}/delete-student")
