@@ -16,4 +16,83 @@ public class Notification {
     private String receivedId;
     private NotificationType type;
     private Instant createAt = Instant.now();
+    private boolean isRead = false;
+
+    public Notification() {
+    }
+
+    public Notification(String id, String title, String content, String senderId, String receivedId, NotificationType type, Instant createAt, boolean isRead) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.senderId = senderId;
+        this.receivedId = receivedId;
+        this.type = type;
+        this.createAt = createAt;
+        this.isRead = isRead;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
+
+    public String getReceivedId() {
+        return receivedId;
+    }
+
+    public void setReceivedId(String receivedId) {
+        this.receivedId = receivedId;
+    }
+
+    public NotificationType getType() {
+        return type;
+    }
+
+    public void setType(NotificationType type) {
+        this.type = type;
+    }
+
+    public Instant getCreateAt() {
+        return createAt;
+    }
+
+    public void setCreateAt(Instant createAt) {
+        this.createAt = createAt;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
+    }
 }

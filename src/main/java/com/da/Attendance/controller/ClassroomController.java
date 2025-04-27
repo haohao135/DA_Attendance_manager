@@ -1,5 +1,6 @@
 package com.da.Attendance.controller;
 
+import com.da.Attendance.dto.request.Classroom.AddClassroomRequest;
 import com.da.Attendance.dto.response.ApiResponse;
 import com.da.Attendance.model.Classroom;
 import com.da.Attendance.service.ClassroomService;
@@ -17,11 +18,21 @@ import java.util.List;
 public class ClassroomController {
     @Autowired
     private ClassroomService classroomService;
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> getClass(@PathVariable String id){
+    @GetMapping("/get")
+    public ResponseEntity<ApiResponse> getClass(@RequestParam String id){
         try{
             Classroom classroom = classroomService.findClassById(id);
             return ResponseEntity.ok(new ApiResponse("Get class success", classroom));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Get class failed " + e.getMessage(), null));
+        }
+    }
+    @GetMapping("/get/teacher")
+    public ResponseEntity<ApiResponse> getByTeacher(@RequestParam String id){
+        try{
+            List<Classroom> classrooms = classroomService.findByTeacherId(id);
+            return ResponseEntity.ok(new ApiResponse("Get class success", classrooms));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Get class failed " + e.getMessage(), null));
@@ -38,18 +49,17 @@ public class ClassroomController {
         }
     }
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> addClass(@RequestParam String className,
-                                                @RequestParam String classId){
+    public ResponseEntity<ApiResponse> addClass(@RequestBody AddClassroomRequest addClassroomRequest){
         try{
-            Classroom classroom = classroomService.addClass(className, classId);
+            Classroom classroom = classroomService.addClass(addClassroomRequest);
             return ResponseEntity.ok(new ApiResponse("Add class success", classroom));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Add class failed " + e.getMessage(), null));
         }
     }
-    @PostMapping("/{id}/add-teacher")
-    public ResponseEntity<ApiResponse> addTeacher(@PathVariable String id, @RequestParam String teacherId){
+    @PostMapping("/add-teacher")
+    public ResponseEntity<ApiResponse> addTeacher(@RequestParam String id, @RequestParam String teacherId){
         try{
             Classroom classroom = classroomService.addTeacher(id, teacherId);
             return ResponseEntity.ok(new ApiResponse("Add teacher success", classroom));

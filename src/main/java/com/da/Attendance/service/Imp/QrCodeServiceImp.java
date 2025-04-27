@@ -24,6 +24,12 @@ public class QrCodeServiceImp implements QrCodeService {
     private QrCodeRepository qrCodeRepository;
     @Override
     public String generateQRCode(String sessionId, double latitude, double longitude) throws WriterException {
+        if (sessionId == null || sessionId.trim().isEmpty()) {
+            throw new IllegalArgumentException("sessionId cannot be empty");
+        }
+        if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            throw new IllegalArgumentException("invalid coordinates");
+        }
         qrCodeRepository.deleteBySessionId(sessionId);
         Instant createdAt = Instant.now();
         Instant expiresAt = createdAt.plusSeconds(300);

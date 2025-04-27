@@ -1,5 +1,6 @@
 package com.da.Attendance.service.Imp;
 
+import com.da.Attendance.dto.request.Classroom.AddClassroomRequest;
 import com.da.Attendance.model.Classroom;
 import com.da.Attendance.repository.ClassroomRepository;
 import com.da.Attendance.service.ClassroomService;
@@ -27,11 +28,19 @@ public class ClassroomServiceImp implements ClassroomService {
     }
 
     @Override
-    public Classroom addClass(String className, String classId) {
-        if (className == null || className.isBlank()) {
+    public List<Classroom> findByTeacherId(String teacherId) {
+        return classroomRepository.findByTeacherId(teacherId);
+    }
+
+    @Override
+    public Classroom addClass(AddClassroomRequest addClassroomRequest) {
+        if (addClassroomRequest.getClassName() == null || addClassroomRequest.getClassName().isBlank()) {
             throw new IllegalArgumentException("class name cannot be null or empty");
         }
-        Classroom classroom = new Classroom(className, classId);
+        Classroom classroom = new Classroom();
+        classroom.setClassName(addClassroomRequest.getClassName());
+        classroom.setClassId(addClassroomRequest.getClassId());
+        classroom.setRoom(addClassroomRequest.getRoom());
         return classroomRepository.save(classroom);
     }
 

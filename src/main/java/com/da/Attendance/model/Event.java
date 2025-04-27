@@ -14,27 +14,30 @@ public class Event {
     private String nameEvent;
     private String description;
     private String location;
-    private Instant dateTime;
+    private Instant timeStart;
+    private Instant timeEnd;
     private String organizerId;
     private List<String> participantIds = new ArrayList<>();
 
     public Event() {
     }
 
-    public Event(String nameEvent, String description, String location, Instant dateTime, String organizerId) {
+    public Event(String nameEvent, String description, String location, Instant timeStart, Instant timeEnd, String organizerId) {
         this.nameEvent = nameEvent;
         this.description = description;
         this.location = location;
-        this.dateTime = dateTime;
+        this.timeStart = timeStart;
+        this.timeEnd = timeEnd;
         this.organizerId = organizerId;
     }
 
-    public Event(String id, String nameEvent, String description, String location, Instant dateTime, String organizerId) {
+    public Event(String id, String nameEvent, String description, String location, Instant timeStart, Instant timeEnd, String organizerId) {
         this.id = id;
         this.nameEvent = nameEvent;
         this.description = description;
         this.location = location;
-        this.dateTime = dateTime;
+        this.timeStart = timeStart;
+        this.timeEnd = timeEnd;
         this.organizerId = organizerId;
     }
 
@@ -70,14 +73,6 @@ public class Event {
         this.location = location;
     }
 
-    public Instant getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(Instant dateTime) {
-        this.dateTime = dateTime;
-    }
-
     public String getOrganizerId() {
         return organizerId;
     }
@@ -88,6 +83,22 @@ public class Event {
 
     public List<String> getParticipantIds() {
         return participantIds;
+    }
+
+    public Instant getTimeStart() {
+        return timeStart;
+    }
+
+    public void setTimeStart(Instant timeStart) {
+        this.timeStart = timeStart;
+    }
+
+    public Instant getTimeEnd() {
+        return timeEnd;
+    }
+
+    public void setTimeEnd(Instant timeEnd) {
+        this.timeEnd = timeEnd;
     }
 
     public void setParticipantIds(List<String> participantIds) {

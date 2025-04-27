@@ -1,6 +1,7 @@
 package com.da.Attendance.service.Imp;
 
 import com.da.Attendance.dto.request.Event.AddEventRequest;
+import com.da.Attendance.dto.request.Event.AddStudentsRequest;
 import com.da.Attendance.dto.request.Event.UpdateEventRequest;
 import com.da.Attendance.model.Event;
 import com.da.Attendance.repository.EventRepository;
@@ -35,9 +36,31 @@ public class EventServiceImp implements EventService {
                 addEventRequest.getNameEvent(),
                 addEventRequest.getDescription(),
                 addEventRequest.getLocation(),
-                addEventRequest.getDateTime(),
+                addEventRequest.getTimeStart(),
+                addEventRequest.getTimeEnd(),
                 addEventRequest.getOrganizerId()
         );
+        return eventRepository.save(event);
+    }
+
+    @Override
+    public Event addStudent(String id, String studentId) {
+        Event event = findEventById(id);
+        if (!event.getParticipantIds().contains(studentId)) {
+            event.getParticipantIds().add(studentId);
+            return eventRepository.save(event);
+        }
+        return event;
+    }
+
+    @Override
+    public Event addStudentList(AddStudentsRequest addStudentsRequest) {
+        Event event = findEventById(addStudentsRequest.getId());
+        for (String studentId : addStudentsRequest.getStudentIds()) {
+            if (!event.getParticipantIds().contains(studentId)) {
+                event.getParticipantIds().add(studentId);
+            }
+        }
         return eventRepository.save(event);
     }
 
@@ -52,9 +75,14 @@ public class EventServiceImp implements EventService {
 
     @Override
     public Event updateTime(String id, Instant instant) {
-        Event event = findEventById(id);
-        event.setDateTime(instant);
-        return eventRepository.save(event);
+//        Event event = findEventById(id);
+//
+        return null;
+    }
+
+    @Override
+    public List<Event> getEventByStudentId(String id) {
+        return eventRepository.findByParticipantIdsContaining(id);
     }
 
     @Override

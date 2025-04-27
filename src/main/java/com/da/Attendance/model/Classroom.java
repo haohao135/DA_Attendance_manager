@@ -13,6 +13,7 @@ public class Classroom {
     private String className;
     private String teacherId;
     private String classId;
+    private String room;
     private List<String> studentIds = new ArrayList<>();
 
     public Classroom() {}
@@ -22,11 +23,12 @@ public class Classroom {
         this.classId = classId;
     }
 
-    public Classroom(String id, String className, String teacherId, String classId, List<String> studentIds) {
+    public Classroom(String id, String className, String teacherId, String classId, String room, List<String> studentIds) {
         this.id = id;
         this.className = className;
         this.teacherId = teacherId;
         this.classId = classId;
+        this.room = room;
         this.studentIds = studentIds;
     }
 
@@ -68,5 +70,13 @@ public class Classroom {
 
     public void setClassId(String classId) {
         this.classId = classId;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
     }
 }

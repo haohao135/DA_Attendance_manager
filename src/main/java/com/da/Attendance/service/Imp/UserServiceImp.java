@@ -122,6 +122,15 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
+    public User getUserByEmail(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isEmpty()){
+            throw new RuntimeException("user not found");
+        }
+        return user.get();
+    }
+
+    @Override
     public void changeRole(String id, UserRole userRole) {
         User user = getUserById(id);
         user.getUserRole().add(userRole);

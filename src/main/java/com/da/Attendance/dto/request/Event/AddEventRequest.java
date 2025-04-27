@@ -6,17 +6,19 @@ public class AddEventRequest {
     private String nameEvent;
     private String description;
     private String location;
-    private Instant dateTime;
+    private Instant timeStart;
+    private Instant timeEnd;
     private String organizerId;
 
     public AddEventRequest() {
     }
 
-    public AddEventRequest(String nameEvent, String description, String location, Instant dateTime, String organizerId) {
+    public AddEventRequest(String nameEvent, String description, String location, Instant timeStart, Instant timeEnd, String organizerId) {
         this.nameEvent = nameEvent;
         this.description = description;
         this.location = location;
-        this.dateTime = dateTime;
+        this.timeStart = timeStart;
+        this.timeEnd = timeEnd;
         this.organizerId = organizerId;
     }
 
@@ -44,19 +46,27 @@ public class AddEventRequest {
         this.location = location;
     }
 
-    public Instant getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(Instant dateTime) {
-        this.dateTime = dateTime;
-    }
-
     public String getOrganizerId() {
         return organizerId;
     }
 
     public void setOrganizerId(String organizerId) {
         this.organizerId = organizerId;
+    }
+
+    public Instant getTimeStart() {
+        return timeStart;
+    }
+
+    public void setTimeStart(Instant timeStart) {
+        this.timeStart = timeStart;
+    }
+
+    public Instant getTimeEnd() {
+        return timeEnd;
+    }
+
+    public void setTimeEnd(Instant timeEnd) {
+        this.timeEnd = timeEnd;
     }
 }

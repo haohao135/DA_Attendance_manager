@@ -1,9 +1,16 @@
 package com.da.Attendance.service;
 
+import com.da.Attendance.dto.request.AttendanceRecord.AddAttendanceRecordRequest;
+import com.da.Attendance.model.AttendanceRecord;
+import com.google.zxing.NotFoundException;
+
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public interface AttendanceRecordService {
-    Map<String, String> validateAttendance(String sessionId, String studentId, double studentLatitude, double studentLongitude);
-    Map<String, String> validateEventAttendance(String eventId, String studentId, double studentLatitude, double studentLongitude);
+    String scanAndRecordAttendance(String qrCodeBase64, String studentId, double userLatitude, double userLongitude) throws IOException, NotFoundException;
     double calculateDistance(double lat1, double lon1, double lat2, double lon2);
+    List<AttendanceRecord> getAbsences(String studentId);
+    boolean add(AddAttendanceRecordRequest addAttendanceRecordRequest);
 }

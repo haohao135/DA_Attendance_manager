@@ -20,6 +20,7 @@ public interface UserService {
     User getUserById(String id);
     List<User> getAllUser();
     List<User> getUserByRole(UserRole userRole);
+    User getUserByEmail(String email);
     void changeRole(String id, UserRole userRole);
     void deleteRole(String id, UserRole userRole);
     void deleteUserById(String id);
