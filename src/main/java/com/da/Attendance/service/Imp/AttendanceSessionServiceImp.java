@@ -9,6 +9,7 @@ import com.da.Attendance.model.Classroom;
 import com.da.Attendance.model.User;
 import com.da.Attendance.model.enums.AttendanceStatus;
 import com.da.Attendance.repository.AttendanceSessionRepository;
+import com.da.Attendance.repository.ClassroomRepository;
 import com.da.Attendance.service.AttendanceRecordService;
 import com.da.Attendance.service.AttendanceSessionService;
 import com.da.Attendance.service.ClassroomService;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AttendanceSessionServiceImp implements AttendanceSessionService {
@@ -30,6 +32,8 @@ public class AttendanceSessionServiceImp implements AttendanceSessionService {
     ClassroomService classroomService;
     @Autowired
     UserService userService;
+    @Autowired
+    ClassroomRepository classroomRepository;
     @Override
     public List<AttendanceSession> getAttendanceSessionAbsences(String studentId) {
         List<AttendanceRecord> attendanceRecords = attendanceRecordService.getAbsences(studentId);
@@ -91,4 +95,46 @@ public class AttendanceSessionServiceImp implements AttendanceSessionService {
         }
         return attendanceSessionScheduleResponseList;
     }
+
+    @Override
+    public List<AttendanceSessionScheduleResponse> getAttendanceSessionsByTeacherId(String teacherId) {
+        List<Classroom> classrooms = classroomRepository.findByTeacherId(teacherId);
+        List<String> classIds = classrooms.stream()
+                .map(Classroom::getId)
+                .collect(Collectors.toList());
+        if (classIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<AttendanceSession> attendanceSessions = attendanceSessionRepository.findByClassIdIn(classIds);
+
+        List<AttendanceSessionScheduleResponse> attendanceSessionScheduleResponseList = new ArrayList<>();
+        for (AttendanceSession a : attendanceSessions) {
+            Classroom classroom = classroomService.findClassById(a.getClassId());
+            if (classroom == null) {
+                continue;
+            }
+
+            User user = userService.getUserById(classroom.getTeacherId());
+            if (user == null) {
+                continue;
+            }
+            AttendanceSessionScheduleResponse attendanceSessionScheduleResponse =
+                    new AttendanceSessionScheduleResponse(
+                            a.getClassName(),
+                            classroom.getClassId(),
+                            user.getFullName(),
+                            a.getDateTime(),
+                            classroom.getRoom()
+                    );
+            attendanceSessionScheduleResponseList.add(attendanceSessionScheduleResponse);
+        }
+        return attendanceSessionScheduleResponseList;
+    }
+
+    @Override
+    public List<AttendanceSession> getAttendanceSessionsByClassId(String classId) {
+        return attendanceSessionRepository.findByClassId(classId);
+    }
+
 }

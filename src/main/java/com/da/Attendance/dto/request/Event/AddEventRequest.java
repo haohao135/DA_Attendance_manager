@@ -4,7 +4,6 @@ import java.time.Instant;
 
 public class AddEventRequest {
     private String nameEvent;
-    private String description;
     private String location;
     private Instant timeStart;
     private Instant timeEnd;
@@ -13,9 +12,8 @@ public class AddEventRequest {
     public AddEventRequest() {
     }
 
-    public AddEventRequest(String nameEvent, String description, String location, Instant timeStart, Instant timeEnd, String organizerId) {
+    public AddEventRequest(String nameEvent, String location, Instant timeStart, Instant timeEnd, String organizerId) {
         this.nameEvent = nameEvent;
-        this.description = description;
         this.location = location;
         this.timeStart = timeStart;
         this.timeEnd = timeEnd;
@@ -28,14 +26,6 @@ public class AddEventRequest {
 
     public void setNameEvent(String nameEvent) {
         this.nameEvent = nameEvent;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getLocation() {

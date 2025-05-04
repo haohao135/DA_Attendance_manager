@@ -1,6 +1,7 @@
 package com.da.Attendance.service;
 
 import com.da.Attendance.dto.request.Classroom.AddClassroomRequest;
+import com.da.Attendance.dto.request.Classroom.UpdateClassroomRequest;
 import com.da.Attendance.model.Classroom;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface ClassroomService {
     Classroom addStudents(String id, List<String> studentIds);
     void deleteStudent(String id, String studentId);
     void deleteClass(String id);
+    List<Classroom> getAllClass();
+    void updateClass(String id, UpdateClassroomRequest updateClassroomRequest);
 }

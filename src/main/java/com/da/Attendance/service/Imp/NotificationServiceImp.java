@@ -2,6 +2,7 @@ package com.da.Attendance.service.Imp;
 
 import com.corundumstudio.socketio.SocketIOServer;
 import com.da.Attendance.dto.request.Notification.SendNotificationRequest;
+import com.da.Attendance.dto.response.Notification.GroupedNotificationResponse;
 import com.da.Attendance.model.Notification;
 import com.da.Attendance.model.enums.NotificationType;
 import com.da.Attendance.repository.NotificationRepository;
@@ -11,10 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -94,5 +93,81 @@ public class NotificationServiceImp implements NotificationService {
     @Override
     public List<Notification> getAll() {
         return notificationRepository.findAll();
+    }
+
+    @Override
+    public List<GroupedNotificationResponse> getGroupedNotifications(String senderId) {
+        List<Notification> notifications = notificationRepository.findBySenderIdOrderByCreateAtDesc(senderId);
+
+        return notifications.stream()
+                .collect(Collectors.groupingBy(n -> Arrays.asList(
+                        n.getTitle(),
+                        n.getContent(),
+                        n.getType()
+                )))
+                .entrySet().stream()
+                .map(entry -> {
+                    List<Notification> group = entry.getValue();
+                    Notification first = group.get(0);
+                    return new GroupedNotificationResponse(
+                            first.getTitle(),
+                            first.getContent(),
+                            first.getSenderId(),
+                            first.getType(),
+                            first.getCreateAt(),
+                            group.size()
+                    );
+                })
+                .sorted(Comparator.comparing(GroupedNotificationResponse::getCreateAt).reversed())
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public List<GroupedNotificationResponse> getGroupedStarredNotifications(String senderId) {
+        List<Notification> notifications = notificationRepository.findBySenderIdAndIsStarredBySenderTrueOrderByCreateAtDesc(senderId);
+
+        return notifications.stream()
+                .collect(Collectors.groupingBy(n -> Arrays.asList(
+                        n.getTitle(),
+                        n.getContent(),
+                        n.getType()
+                )))
+                .entrySet().stream()
+                .map(entry -> {
+                    List<Notification> group = entry.getValue();
+                    Notification first = group.get(0);
+                    return new GroupedNotificationResponse(
+                            first.getTitle(),
+                            first.getContent(),
+                            first.getSenderId(),
+                            first.getType(),
+                            first.getCreateAt(),
+                            group.size()
+                    );
+                })
+                .sorted(Comparator.comparing(GroupedNotificationResponse::getCreateAt).reversed())
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<Notification> getStarredNotificationsByReceiver(String receiverId) {
+        return notificationRepository.findByReceivedIdAndIsStarredTrueOrderByCreateAtDesc(receiverId);
+    }
+
+    @Override
+    public Notification updateStarredStatus(String notificationId, boolean isStarred) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new NoSuchElementException("notification not found with ID: " + notificationId));
+
+        notification.setStarred(isStarred);
+        return notificationRepository.save(notification);
+    }
+
+    @Override
+    public Notification updateStarredBySender(String notificationId, boolean isStarred) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+        notification.setStarredBySender(isStarred);
+        return notificationRepository.save(notification);
     }
 }

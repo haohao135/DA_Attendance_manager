@@ -1,6 +1,7 @@
 package com.da.Attendance.service.Imp;
 
 import com.da.Attendance.dto.request.Classroom.AddClassroomRequest;
+import com.da.Attendance.dto.request.Classroom.UpdateClassroomRequest;
 import com.da.Attendance.model.Classroom;
 import com.da.Attendance.repository.ClassroomRepository;
 import com.da.Attendance.service.ClassroomService;
@@ -41,6 +42,7 @@ public class ClassroomServiceImp implements ClassroomService {
         classroom.setClassName(addClassroomRequest.getClassName());
         classroom.setClassId(addClassroomRequest.getClassId());
         classroom.setRoom(addClassroomRequest.getRoom());
+        classroom.setTeacherId(addClassroomRequest.getTeacherId());
         return classroomRepository.save(classroom);
     }
 
@@ -121,5 +123,20 @@ public class ClassroomServiceImp implements ClassroomService {
             throw new RuntimeException("class not found");
         }
         classroomRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Classroom> getAllClass() {
+        return classroomRepository.findAll();
+    }
+
+    @Override
+    public void updateClass(String id, UpdateClassroomRequest updateClassroomRequest) {
+        Classroom classroom = findClassById(id);
+        classroom.setClassName(updateClassroomRequest.getClassName());
+        classroom.setClassId(updateClassroomRequest.getClassId());
+        classroom.setRoom(updateClassroomRequest.getRoom());
+        classroom.setTeacherId(updateClassroomRequest.getTeacherId());
+        classroomRepository.save(classroom);
     }
 }

@@ -17,11 +17,13 @@ public class Notification {
     private NotificationType type;
     private Instant createAt = Instant.now();
     private boolean isRead = false;
+    private boolean isStarred = false;
+    private boolean isStarredBySender = false;
 
     public Notification() {
     }
 
-    public Notification(String id, String title, String content, String senderId, String receivedId, NotificationType type, Instant createAt, boolean isRead) {
+    public Notification(String id, String title, String content, String senderId, String receivedId, NotificationType type, Instant createAt, boolean isRead, boolean isStarred, boolean isStarredBySender) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -30,6 +32,8 @@ public class Notification {
         this.type = type;
         this.createAt = createAt;
         this.isRead = isRead;
+        this.isStarred = isStarred;
+        this.isStarredBySender = isStarredBySender;
     }
 
     public String getId() {
@@ -94,5 +98,21 @@ public class Notification {
 
     public void setRead(boolean read) {
         isRead = read;
+    }
+
+    public boolean isStarred() {
+        return isStarred;
+    }
+
+    public void setStarred(boolean starred) {
+        isStarred = starred;
+    }
+
+    public boolean isStarredBySender() {
+        return isStarredBySender;
+    }
+
+    public void setStarredBySender(boolean starredBySender) {
+        isStarredBySender = starredBySender;
     }
 }

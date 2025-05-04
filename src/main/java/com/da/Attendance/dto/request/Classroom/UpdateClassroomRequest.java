@@ -1,15 +1,15 @@
 package com.da.Attendance.dto.request.Classroom;
 
-public class AddClassroomRequest {
+public class UpdateClassroomRequest {
     private String className;
     private String classId;
     private String room;
     private String teacherId;
 
-    public AddClassroomRequest() {
+    public UpdateClassroomRequest() {
     }
 
-    public AddClassroomRequest(String className, String classId, String room, String teacherId) {
+    public UpdateClassroomRequest(String className, String classId, String room, String teacherId) {
         this.className = className;
         this.classId = classId;
         this.room = room;

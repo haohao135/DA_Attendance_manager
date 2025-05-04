@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface AttendanceSessionRepository extends MongoRepository<AttendanceSession, String> {
     List<AttendanceSession> findByAttendanceRecordsStudentIdContains(String studentId);
+    List<AttendanceSession> findByClassIdIn(List<String> classIds);
+    List<AttendanceSession> findByClassId(String classId);
 }

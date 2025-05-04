@@ -12,4 +12,6 @@ public interface AttendanceSessionService {
     AttendanceSession getById(String id);
     AttendanceSession add(AddAttendanceSessionRequest addAttendanceSessionRequest);
     List<AttendanceSessionScheduleResponse> getAttendanceSessionScheduleByUserId(String id);
+    List<AttendanceSessionScheduleResponse> getAttendanceSessionsByTeacherId(String teacherId);
+    List<AttendanceSession> getAttendanceSessionsByClassId(String classId);
 }

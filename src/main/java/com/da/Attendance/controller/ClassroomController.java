@@ -1,6 +1,7 @@
 package com.da.Attendance.controller;
 
 import com.da.Attendance.dto.request.Classroom.AddClassroomRequest;
+import com.da.Attendance.dto.request.Classroom.UpdateClassroomRequest;
 import com.da.Attendance.dto.response.ApiResponse;
 import com.da.Attendance.model.Classroom;
 import com.da.Attendance.service.ClassroomService;
@@ -118,14 +119,34 @@ public class ClassroomController {
                     .body(new ApiResponse("Delete student failed " + e.getMessage(), null));
         }
     }
-    @PostMapping("/{id}/delete-class")
-    public ResponseEntity<ApiResponse> deleteClass(@PathVariable String id){
+    @PostMapping("/delete")
+    public ResponseEntity<ApiResponse> deleteClass(@RequestParam String id){
         try{
             classroomService.deleteClass(id);
             return ResponseEntity.ok(new ApiResponse("Delete class success", null));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Delete class failed " + e.getMessage(), null));
+        }
+    }
+    @GetMapping("/get/all")
+    public ResponseEntity<ApiResponse> getAllClass(){
+        try{
+            List<Classroom> classrooms = classroomService.getAllClass();
+            return ResponseEntity.ok(new ApiResponse("Get all class success", classrooms));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Get all class failed " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/update")
+    public ResponseEntity<ApiResponse> updateClass(@RequestParam String id, @RequestBody UpdateClassroomRequest update){
+        try{
+            classroomService.updateClass(id, update);
+            return ResponseEntity.ok(new ApiResponse("Update class success", null));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Update class failed " + e.getMessage(), null));
         }
     }
 }

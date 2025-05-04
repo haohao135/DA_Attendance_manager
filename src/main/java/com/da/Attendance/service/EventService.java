@@ -17,4 +17,8 @@ public interface EventService {
     Event updateTime(String id, Instant instant);
     List<Event> getEventByStudentId(String id);
     void deleteEvent(String id);
+    List<Event> getAllEventsByOrganizerId(String organizerId);
+    List<Event> getUpcomingEventsByOrganizerId(String organizerId);
+    List<Event> getPastEventsByOrganizerId(String organizerId);
+    List<Event> getAllEvent();
 }

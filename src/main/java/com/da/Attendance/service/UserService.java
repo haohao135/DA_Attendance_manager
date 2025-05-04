@@ -3,6 +3,7 @@ package com.da.Attendance.service;
 import com.da.Attendance.dto.request.User.ChangePasswordRequest;
 import com.da.Attendance.dto.request.User.UserLoginRequest;
 import com.da.Attendance.dto.request.User.UserRegisterRequest;
+import com.da.Attendance.dto.request.User.UserUpdateAdminRequest;
 import com.da.Attendance.dto.response.User.UserLoginResponse;
 import com.da.Attendance.dto.response.User.UserRegisterResponse;
 import com.da.Attendance.model.User;
@@ -24,4 +25,5 @@ public interface UserService {
     void changeRole(String id, UserRole userRole);
     void deleteRole(String id, UserRole userRole);
     void deleteUserById(String id);
+    void updateUserByAdmin(String id, UserUpdateAdminRequest userUpdateAdminRequest);
 }

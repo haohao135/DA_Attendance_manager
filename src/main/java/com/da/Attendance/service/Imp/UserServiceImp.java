@@ -3,6 +3,7 @@ package com.da.Attendance.service.Imp;
 import com.da.Attendance.dto.request.User.ChangePasswordRequest;
 import com.da.Attendance.dto.request.User.UserLoginRequest;
 import com.da.Attendance.dto.request.User.UserRegisterRequest;
+import com.da.Attendance.dto.request.User.UserUpdateAdminRequest;
 import com.da.Attendance.dto.response.User.UserLoginResponse;
 import com.da.Attendance.dto.response.User.UserRegisterResponse;
 import com.da.Attendance.model.User;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImp implements UserService {
@@ -113,6 +115,8 @@ public class UserServiceImp implements UserService {
 
     @Override
     public List<User> getAllUser() {
+//        return userRepository.findAll().stream().filter(user ->
+//                !user.getUserRole().contains(UserRole.ADMIN)).collect(Collectors.toList());
         return userRepository.findAll();
     }
 
@@ -133,6 +137,7 @@ public class UserServiceImp implements UserService {
     @Override
     public void changeRole(String id, UserRole userRole) {
         User user = getUserById(id);
+        user.getUserRole().clear();
         user.getUserRole().add(userRole);
         userRepository.save(user);
     }
@@ -147,5 +152,14 @@ public class UserServiceImp implements UserService {
     @Override
     public void deleteUserById(String id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public void updateUserByAdmin(String id, UserUpdateAdminRequest userUpdateAdminRequest) {
+        User user = getUserById(id);
+        user.setEmail(userUpdateAdminRequest.getEmail());
+        user.setFullName(userUpdateAdminRequest.getFullName());
+        user.setNumberPhone(userUpdateAdminRequest.getNumberPhone());
+        userRepository.save(user);
     }
 }

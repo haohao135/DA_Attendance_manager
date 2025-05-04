@@ -49,4 +49,24 @@ public class AttendanceSessionController {
                     .body(new ApiResponse("Get attendance session schedule failed " + e.getMessage(), null));
         }
     }
+    @GetMapping("/get/teacher")
+    public ResponseEntity<ApiResponse> getAttendanceSessionByTeacherId(@RequestParam String teacherId){
+        try{
+            List<AttendanceSessionScheduleResponse> attendanceSessions = attendanceSessionService.getAttendanceSessionsByTeacherId(teacherId);
+            return ResponseEntity.ok(new ApiResponse("Get attendance session schedule success", attendanceSessions));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Get attendance session schedule failed " + e.getMessage(), null));
+        }
+    }
+    @GetMapping("/get/class")
+    public ResponseEntity<ApiResponse> getAttendanceSessionsByClassId(@RequestParam String classId){
+        try{
+            List<AttendanceSession> attendanceSessions = attendanceSessionService.getAttendanceSessionsByClassId(classId);
+            return ResponseEntity.ok(new ApiResponse("Get attendance session schedule success", attendanceSessions));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Get attendance session schedule failed " + e.getMessage(), null));
+        }
+    }
 }
