@@ -2,6 +2,7 @@ package com.da.Attendance.controller;
 
 import com.da.Attendance.dto.request.User.UserUpdateAdminRequest;
 import com.da.Attendance.dto.response.ApiResponse;
+import com.da.Attendance.dto.response.User.UserAttendanceRecordResponse;
 import com.da.Attendance.model.User;
 import com.da.Attendance.model.enums.UserRole;
 import com.da.Attendance.service.UserService;
@@ -98,6 +99,26 @@ public class UserController {
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Delete user failed " + e.getMessage(), null));
+        }
+    }
+    @GetMapping("/get/no-attendance")
+    public ResponseEntity<ApiResponse> getUserNoAttendance(@RequestParam String sessionId){
+        try {
+            List<UserAttendanceRecordResponse> user = userService.getUsersNoAttendance(sessionId);
+            return ResponseEntity.ok(new ApiResponse("Get all user no attendance success", user));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("Get all user no attendance failed " + e.getMessage(), null));
+        }
+    }
+    @GetMapping("/get/took-attendance")
+    public ResponseEntity<ApiResponse> getUserTookAttendance(@RequestParam String sessionId){
+        try {
+            List<UserAttendanceRecordResponse> user = userService.getUsersTookAttendance(sessionId);
+            return ResponseEntity.ok(new ApiResponse("Get all user took attendance success", user));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("Get all user took attendance failed " + e.getMessage(), null));
         }
     }
 }

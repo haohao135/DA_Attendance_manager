@@ -4,11 +4,16 @@ import com.da.Attendance.dto.request.User.ChangePasswordRequest;
 import com.da.Attendance.dto.request.User.UserLoginRequest;
 import com.da.Attendance.dto.request.User.UserRegisterRequest;
 import com.da.Attendance.dto.request.User.UserUpdateAdminRequest;
+import com.da.Attendance.dto.response.User.UserAttendanceRecordResponse;
 import com.da.Attendance.dto.response.User.UserLoginResponse;
 import com.da.Attendance.dto.response.User.UserRegisterResponse;
+import com.da.Attendance.model.AttendanceRecord;
 import com.da.Attendance.model.User;
+import com.da.Attendance.model.enums.AttendanceMethod;
+import com.da.Attendance.model.enums.AttendanceStatus;
 import com.da.Attendance.model.enums.UserRole;
 import com.da.Attendance.model.enums.UserStatus;
+import com.da.Attendance.repository.AttendanceRecordRepository;
 import com.da.Attendance.repository.UserRepository;
 import com.da.Attendance.security.JwtUtil;
 import com.da.Attendance.service.UserService;
@@ -33,6 +38,8 @@ public class UserServiceImp implements UserService {
     private AuthenticationManager authenticationManager;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private AttendanceRecordRepository attendanceRecordRepository;
 
     @Override
     public UserRegisterResponse register(UserRegisterRequest userRegisterRequest) {
@@ -115,8 +122,6 @@ public class UserServiceImp implements UserService {
 
     @Override
     public List<User> getAllUser() {
-//        return userRepository.findAll().stream().filter(user ->
-//                !user.getUserRole().contains(UserRole.ADMIN)).collect(Collectors.toList());
         return userRepository.findAll();
     }
 
@@ -161,5 +166,42 @@ public class UserServiceImp implements UserService {
         user.setFullName(userUpdateAdminRequest.getFullName());
         user.setNumberPhone(userUpdateAdminRequest.getNumberPhone());
         userRepository.save(user);
+    }
+
+    @Override
+    public List<UserAttendanceRecordResponse> getUsersNoAttendance(String sessionId) {
+        List<AttendanceRecord> attendanceRecords =
+                attendanceRecordRepository.findByAttendanceSessionIdAndStatus(sessionId, AttendanceStatus.ABSENT);
+
+        List<UserAttendanceRecordResponse> result = new ArrayList<>();
+
+        for (AttendanceRecord record : attendanceRecords) {
+            try {
+                User user = getUserById(record.getStudentId());
+                result.add(new UserAttendanceRecordResponse(record.getId(), user, record.getStatus()));
+            } catch (RuntimeException e) {
+                System.err.println("User not found for studentId: " + record.getStudentId());
+            }
+        }
+        return result;
+    }
+
+
+    @Override
+    public List<UserAttendanceRecordResponse> getUsersTookAttendance(String sessionId) {
+        List<AttendanceRecord> attendanceRecords =
+                attendanceRecordRepository.findByAttendanceSessionIdAndStatusIn(
+                        sessionId, List.of(AttendanceStatus.PRESENT, AttendanceStatus.LATE));
+        List<UserAttendanceRecordResponse> result = new ArrayList<>();
+
+        for (AttendanceRecord record : attendanceRecords) {
+            try {
+                User user = getUserById(record.getStudentId());
+                result.add(new UserAttendanceRecordResponse(record.getId(), user, record.getStatus()));
+            } catch (RuntimeException e) {
+                System.err.println("User not found for studentId: " + record.getStudentId());
+            }
+        }
+        return result;
     }
 }

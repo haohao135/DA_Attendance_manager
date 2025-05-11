@@ -1,6 +1,7 @@
 package com.da.Attendance.controller;
 
 import com.da.Attendance.dto.request.AttendanceSession.AddAttendanceSessionRequest;
+import com.da.Attendance.dto.request.AttendanceSession.UpdateAttendanceSessionRequest;
 import com.da.Attendance.dto.response.ApiResponse;
 import com.da.Attendance.dto.response.AttendanceSession.AttendanceSessionScheduleResponse;
 import com.da.Attendance.model.AttendanceSession;
@@ -27,6 +28,16 @@ public class AttendanceSessionController {
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Add attendance session failed " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/update")
+    public ResponseEntity<ApiResponse> updateAttendanceSession(@RequestParam String id, @RequestBody UpdateAttendanceSessionRequest updateAttendanceSessionRequest){
+        try{
+            AttendanceSession attendanceSession = attendanceSessionService.update(id, updateAttendanceSessionRequest);
+            return ResponseEntity.ok(new ApiResponse("Update attendance session success", attendanceSession));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Update attendance session failed " + e.getMessage(), null));
         }
     }
     @GetMapping("/get-absence")
@@ -67,6 +78,16 @@ public class AttendanceSessionController {
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Get attendance session schedule failed " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/delete")
+    public ResponseEntity<ApiResponse> delete(@RequestParam String id){
+        try{
+            attendanceSessionService.delete(id);
+            return ResponseEntity.ok(new ApiResponse("Delete attendance session success", null));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Delete attendance session failed " + e.getMessage(), null));
         }
     }
 }

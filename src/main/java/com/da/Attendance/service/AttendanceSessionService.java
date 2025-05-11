@@ -1,6 +1,7 @@
 package com.da.Attendance.service;
 
 import com.da.Attendance.dto.request.AttendanceSession.AddAttendanceSessionRequest;
+import com.da.Attendance.dto.request.AttendanceSession.UpdateAttendanceSessionRequest;
 import com.da.Attendance.dto.response.AttendanceSession.AttendanceSessionScheduleResponse;
 import com.da.Attendance.model.AttendanceSession;
 import com.da.Attendance.repository.AttendanceSessionRepository;
@@ -14,4 +15,6 @@ public interface AttendanceSessionService {
     List<AttendanceSessionScheduleResponse> getAttendanceSessionScheduleByUserId(String id);
     List<AttendanceSessionScheduleResponse> getAttendanceSessionsByTeacherId(String teacherId);
     List<AttendanceSession> getAttendanceSessionsByClassId(String classId);
+    AttendanceSession update(String id, UpdateAttendanceSessionRequest updateAttendanceSessionRequest);
+    void delete(String id);
 }

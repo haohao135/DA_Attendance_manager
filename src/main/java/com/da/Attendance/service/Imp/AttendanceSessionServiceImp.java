@@ -2,6 +2,7 @@ package com.da.Attendance.service.Imp;
 
 import com.da.Attendance.dto.request.AttendanceRecord.AddAttendanceRecordRequest;
 import com.da.Attendance.dto.request.AttendanceSession.AddAttendanceSessionRequest;
+import com.da.Attendance.dto.request.AttendanceSession.UpdateAttendanceSessionRequest;
 import com.da.Attendance.dto.response.AttendanceSession.AttendanceSessionScheduleResponse;
 import com.da.Attendance.model.AttendanceRecord;
 import com.da.Attendance.model.AttendanceSession;
@@ -135,6 +136,23 @@ public class AttendanceSessionServiceImp implements AttendanceSessionService {
     @Override
     public List<AttendanceSession> getAttendanceSessionsByClassId(String classId) {
         return attendanceSessionRepository.findByClassId(classId);
+    }
+
+    @Override
+    public AttendanceSession update(String id, UpdateAttendanceSessionRequest updateAttendanceSessionRequest) {
+        AttendanceSession attendanceSession = getById(id);
+        attendanceSession.setClassName(updateAttendanceSessionRequest.getClassName());
+        attendanceSession.setClassId(updateAttendanceSessionRequest.getClassId());
+        attendanceSession.setDateTime(updateAttendanceSessionRequest.getDateTime());
+        attendanceSession.setMethod(updateAttendanceSessionRequest.getMethod());
+        attendanceSession.setAttendanceRecordsStudentId(updateAttendanceSessionRequest.getAttendanceRecordsStudentId());
+        attendanceSessionRepository.save(attendanceSession);
+        return null;
+    }
+
+    @Override
+    public void delete(String id) {
+        attendanceSessionRepository.deleteById(id);
     }
 
 }

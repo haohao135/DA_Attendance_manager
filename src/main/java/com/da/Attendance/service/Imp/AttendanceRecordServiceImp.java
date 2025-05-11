@@ -138,6 +138,18 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
         attendanceRecordRepository.saveAll(records);
         return true;
     }
+
+    @Override
+    public AttendanceRecord updateStatus(String id, AttendanceStatus attendanceStatus) {
+        Optional<AttendanceRecord> attendanceRecords = attendanceRecordRepository.findById(id);
+        if(attendanceRecords.isEmpty()){
+            throw new RuntimeException("attendance record not found");
+        }
+        AttendanceRecord attendanceRecord = attendanceRecords.get();
+        attendanceRecord.setStatus(attendanceStatus);
+        return attendanceRecordRepository.save(attendanceRecord);
+    }
+
     private String extractSessionId(String qrContent) {
         String[] parts = qrContent.split("&");
         for (String part : parts) {

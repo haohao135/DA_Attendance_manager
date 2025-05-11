@@ -2,6 +2,7 @@ package com.da.Attendance.service;
 
 import com.da.Attendance.dto.request.AttendanceRecord.AddAttendanceRecordRequest;
 import com.da.Attendance.model.AttendanceRecord;
+import com.da.Attendance.model.enums.AttendanceStatus;
 import com.google.zxing.NotFoundException;
 
 import java.io.IOException;
@@ -13,4 +14,5 @@ public interface AttendanceRecordService {
     double calculateDistance(double lat1, double lon1, double lat2, double lon2);
     List<AttendanceRecord> getAbsences(String studentId);
     boolean add(AddAttendanceRecordRequest addAttendanceRecordRequest);
+    AttendanceRecord updateStatus(String id, AttendanceStatus attendanceStatus);
 }
