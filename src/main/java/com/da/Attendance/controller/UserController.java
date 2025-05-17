@@ -1,5 +1,6 @@
 package com.da.Attendance.controller;
 
+import com.da.Attendance.dto.request.User.FilterUserRequest;
 import com.da.Attendance.dto.request.User.UserUpdateAdminRequest;
 import com.da.Attendance.dto.response.ApiResponse;
 import com.da.Attendance.dto.response.User.UserAttendanceRecordResponse;
@@ -119,6 +120,36 @@ public class UserController {
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse("Get all user took attendance failed " + e.getMessage(), null));
+        }
+    }
+    @GetMapping("/get/no-attendance/event")
+    public ResponseEntity<ApiResponse> getUserNoAttendanceEvent(@RequestParam String eventId){
+        try {
+            List<UserAttendanceRecordResponse> user = userService.getUsersNoAttendanceEvent(eventId);
+            return ResponseEntity.ok(new ApiResponse("Get all user no attendance event success", user));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("Get all user no attendance event failed " + e.getMessage(), null));
+        }
+    }
+    @GetMapping("/get/took-attendance/event")
+    public ResponseEntity<ApiResponse> getUserTookAttendanceEvent(@RequestParam String eventId){
+        try {
+            List<UserAttendanceRecordResponse> user = userService.getUsersTookAttendanceEvent(eventId);
+            return ResponseEntity.ok(new ApiResponse("Get all user took attendance event success", user));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("Get all user took attendance event failed " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/get/filter-by-role")
+    public ResponseEntity<ApiResponse> getUsersByRole(@RequestBody FilterUserRequest filterUserRequest) {
+        try {
+            List<User> users = userService.getUsersByRoleExcludingIds(filterUserRequest.getUserRole(), filterUserRequest.getStudentId());
+            return ResponseEntity.ok(new ApiResponse("Get users success", users));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("Get users failed " + e.getMessage(), null));
         }
     }
 }

@@ -5,6 +5,7 @@ import com.da.Attendance.dto.request.Event.AddStudentsRequest;
 import com.da.Attendance.dto.request.Event.UpdateEventRequest;
 import com.da.Attendance.model.Event;
 import com.da.Attendance.repository.EventRepository;
+import com.da.Attendance.service.EventRecordService;
 import com.da.Attendance.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -20,6 +21,8 @@ import java.util.Optional;
 public class EventServiceImp implements EventService {
     @Autowired
     private EventRepository eventRepository;
+    @Autowired
+    private EventRecordService eventRecordService;
 
     @Override
     public Event findEventById(String id) {
@@ -38,7 +41,9 @@ public class EventServiceImp implements EventService {
         event.setTimeStart(addEventRequest.getTimeStart());
         event.setTimeEnd(addEventRequest.getTimeEnd());
         event.setOrganizerId(addEventRequest.getOrganizerId());
-        return eventRepository.save(event);
+        Event saveEvent = eventRepository.save(event);
+        eventRecordService.add(saveEvent);
+        return saveEvent;
     }
 
     @Override
@@ -46,7 +51,8 @@ public class EventServiceImp implements EventService {
         Event event = findEventById(id);
         if (!event.getParticipantIds().contains(studentId)) {
             event.getParticipantIds().add(studentId);
-            return eventRepository.save(event);
+            Event saveEvent = eventRepository.save(event);
+            eventRecordService.addOne(saveEvent, studentId);
         }
         return event;
     }

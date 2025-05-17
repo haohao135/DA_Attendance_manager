@@ -29,4 +29,7 @@ public interface UserService {
     void updateUserByAdmin(String id, UserUpdateAdminRequest userUpdateAdminRequest);
     List<UserAttendanceRecordResponse> getUsersNoAttendance(String sessionId);
     List<UserAttendanceRecordResponse> getUsersTookAttendance(String sessionId);
+    List<UserAttendanceRecordResponse> getUsersNoAttendanceEvent(String eventId);
+    List<UserAttendanceRecordResponse> getUsersTookAttendanceEvent(String eventId);
+    List<User> getUsersByRoleExcludingIds(UserRole role, List<String> excludeIds);
 }

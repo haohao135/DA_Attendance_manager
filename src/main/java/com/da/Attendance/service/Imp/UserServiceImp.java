@@ -8,12 +8,14 @@ import com.da.Attendance.dto.response.User.UserAttendanceRecordResponse;
 import com.da.Attendance.dto.response.User.UserLoginResponse;
 import com.da.Attendance.dto.response.User.UserRegisterResponse;
 import com.da.Attendance.model.AttendanceRecord;
+import com.da.Attendance.model.EventRecord;
 import com.da.Attendance.model.User;
 import com.da.Attendance.model.enums.AttendanceMethod;
 import com.da.Attendance.model.enums.AttendanceStatus;
 import com.da.Attendance.model.enums.UserRole;
 import com.da.Attendance.model.enums.UserStatus;
 import com.da.Attendance.repository.AttendanceRecordRepository;
+import com.da.Attendance.repository.EventRecordRepository;
 import com.da.Attendance.repository.UserRepository;
 import com.da.Attendance.security.JwtUtil;
 import com.da.Attendance.service.UserService;
@@ -24,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,6 +43,8 @@ public class UserServiceImp implements UserService {
     private JwtUtil jwtUtil;
     @Autowired
     private AttendanceRecordRepository attendanceRecordRepository;
+    @Autowired
+    private EventRecordRepository eventRecordRepository;
 
     @Override
     public UserRegisterResponse register(UserRegisterRequest userRegisterRequest) {
@@ -203,5 +208,42 @@ public class UserServiceImp implements UserService {
             }
         }
         return result;
+    }
+
+    @Override
+    public List<UserAttendanceRecordResponse> getUsersNoAttendanceEvent(String eventId) {
+        List<EventRecord> eventRecords = eventRecordRepository.
+                findByEventIdAndAttendanceStatus(eventId, AttendanceStatus.ABSENT);
+        List<UserAttendanceRecordResponse> result = new ArrayList<>();
+        for (EventRecord record : eventRecords) {
+            try {
+                User user = getUserById(record.getStudentId());
+                result.add(new UserAttendanceRecordResponse(record.getId(), user, record.getAttendanceStatus()));
+            } catch (RuntimeException e) {
+                System.err.println("user not found for studentId: " + record.getStudentId());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<UserAttendanceRecordResponse> getUsersTookAttendanceEvent(String eventId) {
+        List<EventRecord> eventRecords = eventRecordRepository.
+                findByEventIdAndAttendanceStatus(eventId, AttendanceStatus.PRESENT);
+        List<UserAttendanceRecordResponse> result = new ArrayList<>();
+        for (EventRecord record : eventRecords) {
+            try {
+                User user = getUserById(record.getStudentId());
+                result.add(new UserAttendanceRecordResponse(record.getId(), user, record.getAttendanceStatus()));
+            } catch (RuntimeException e) {
+                System.err.println("user not found for studentId: " + record.getStudentId());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<User> getUsersByRoleExcludingIds(UserRole role, List<String> excludeIds) {
+        return userRepository.findByUserRoleInAndIdNotIn(Collections.singletonList(role), excludeIds);
     }
 }

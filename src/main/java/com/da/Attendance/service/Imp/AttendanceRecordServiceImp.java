@@ -1,6 +1,7 @@
 package com.da.Attendance.service.Imp;
 
 import com.da.Attendance.dto.request.AttendanceRecord.AddAttendanceRecordRequest;
+import com.da.Attendance.dto.response.AttendanceRecordResponse.AttendanceResponse;
 import com.da.Attendance.model.AttendanceRecord;
 import com.da.Attendance.model.AttendanceSession;
 import com.da.Attendance.model.Event;
@@ -47,9 +48,9 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
 
     @Override
     @Transactional
-    public String scanAndRecordAttendance(String qrCodeBase64, String studentId, double userLatitude, double userLongitude)
+    public AttendanceResponse scanAndRecordAttendance(String qrContent, String studentId, double userLatitude, double userLongitude)
             throws IOException, NotFoundException {
-        if (qrCodeBase64 == null || qrCodeBase64.trim().isEmpty()) {
+        if (qrContent == null || qrContent.trim().isEmpty()) {
             throw new IllegalArgumentException("invalid QR code Base64 string");
         }
         if (studentId == null || studentId.trim().isEmpty()) {
@@ -58,13 +59,6 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
         if (userLatitude < -90 || userLatitude > 90 || userLongitude < -180 || userLongitude > 180) {
             throw new IllegalArgumentException("invalid user coordinates");
         }
-        byte[] imageBytes = Base64.getDecoder().decode(qrCodeBase64);
-        BufferedImage qrImage = javax.imageio.ImageIO.read(new ByteArrayInputStream(imageBytes));
-
-        LuminanceSource source = new BufferedImageLuminanceSource(qrImage);
-        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-        MultiFormatReader reader = new MultiFormatReader();
-        String qrContent = reader.decode(bitmap).getText();
 
         String sessionId = extractSessionId(qrContent);
         long expiresAtMillis = extractExpiresAt(qrContent);
@@ -90,19 +84,15 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
         }
         Optional<AttendanceRecord> existingRecord = attendanceRecordRepository
                 .findByAttendanceSessionIdAndStudentId(sessionId, studentId);
-        if (existingRecord.isPresent()) {
-            throw new IllegalArgumentException("you have checked in for this session!");
-        }
-        AttendanceRecord attendance = new AttendanceRecord();
-        attendance.setStudentId(studentId);
-        attendance.setAttendanceSessionId(sessionId);
-        attendance.setTimestamp(now);
-        attendance.setLatitude(userLatitude);
-        attendance.setLongitude(userLongitude);
-        attendance.setMethod(AttendanceMethod.QR_CODE);
-        attendance.setStatus(AttendanceStatus.PRESENT);
-        attendanceRecordRepository.save(attendance);
-        return "roll call successful!";
+        AttendanceRecord attendanceRecord = existingRecord
+                .orElseThrow(() -> new IllegalArgumentException("You do not exist in this session!"));
+        attendanceRecord.setTimestamp(now);
+        attendanceRecord.setLatitude(userLatitude);
+        attendanceRecord.setLongitude(userLongitude);
+        attendanceRecord.setMethod(AttendanceMethod.QR_CODE);
+        attendanceRecord.setStatus(AttendanceStatus.PRESENT);
+        attendanceRecordRepository.save(attendanceRecord);
+        return new AttendanceResponse("Roll call successful!", attendanceRecord.getTimestamp());
     }
 
     @Override
@@ -148,6 +138,16 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
         AttendanceRecord attendanceRecord = attendanceRecords.get();
         attendanceRecord.setStatus(attendanceStatus);
         return attendanceRecordRepository.save(attendanceRecord);
+    }
+
+    @Override
+    public void addOne(AttendanceSession attendanceSession, String studentId) {
+        AttendanceRecord attendanceRecord = new AttendanceRecord();
+        attendanceRecord.setAttendanceSessionId(attendanceSession.getId());
+        attendanceRecord.setStudentId(studentId);
+        attendanceRecord.setStatus(AttendanceStatus.ABSENT);
+        attendanceRecord.setMethod(AttendanceMethod.QR_CODE);
+        attendanceRecordRepository.save(attendanceRecord);
     }
 
     private String extractSessionId(String qrContent) {

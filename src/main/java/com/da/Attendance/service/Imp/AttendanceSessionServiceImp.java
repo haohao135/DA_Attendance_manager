@@ -4,10 +4,7 @@ import com.da.Attendance.dto.request.AttendanceRecord.AddAttendanceRecordRequest
 import com.da.Attendance.dto.request.AttendanceSession.AddAttendanceSessionRequest;
 import com.da.Attendance.dto.request.AttendanceSession.UpdateAttendanceSessionRequest;
 import com.da.Attendance.dto.response.AttendanceSession.AttendanceSessionScheduleResponse;
-import com.da.Attendance.model.AttendanceRecord;
-import com.da.Attendance.model.AttendanceSession;
-import com.da.Attendance.model.Classroom;
-import com.da.Attendance.model.User;
+import com.da.Attendance.model.*;
 import com.da.Attendance.model.enums.AttendanceStatus;
 import com.da.Attendance.repository.AttendanceSessionRepository;
 import com.da.Attendance.repository.ClassroomRepository;
@@ -153,6 +150,18 @@ public class AttendanceSessionServiceImp implements AttendanceSessionService {
     @Override
     public void delete(String id) {
         attendanceSessionRepository.deleteById(id);
+    }
+
+    @Override
+    public AttendanceSession addOneStudent(String id, String studentId) {
+        AttendanceSession attendanceSession = getById(id);
+        if (!attendanceSession.getAttendanceRecordsStudentId().contains(studentId)) {
+            attendanceSession.getAttendanceRecordsStudentId().add(studentId);
+            AttendanceSession saveAttendanceSession = attendanceSessionRepository.save(attendanceSession);
+            attendanceRecordService.addOne(attendanceSession, studentId);
+            return saveAttendanceSession;
+        }
+        return attendanceSession;
     }
 
 }

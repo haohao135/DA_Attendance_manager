@@ -17,4 +17,5 @@ public interface AttendanceSessionService {
     List<AttendanceSession> getAttendanceSessionsByClassId(String classId);
     AttendanceSession update(String id, UpdateAttendanceSessionRequest updateAttendanceSessionRequest);
     void delete(String id);
+    AttendanceSession addOneStudent(String id, String studentId);
 }

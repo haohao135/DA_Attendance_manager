@@ -1,6 +1,8 @@
 package com.da.Attendance.controller;
 
+import com.da.Attendance.dto.request.QrCode.QRScanRequest;
 import com.da.Attendance.dto.response.ApiResponse;
+import com.da.Attendance.dto.response.AttendanceRecordResponse.AttendanceResponse;
 import com.da.Attendance.model.AttendanceRecord;
 import com.da.Attendance.model.Classroom;
 import com.da.Attendance.model.enums.AttendanceStatus;
@@ -20,26 +22,28 @@ import java.util.Map;
 public class AttendanceRecordController {
     @Autowired
     private AttendanceRecordService attendanceRecordService;
-    @Autowired
-    private AttendanceRecordService attendanceService;
-
     @PostMapping("/scan")
-    public ResponseEntity<String> scanAndRecordAttendance(
-            @RequestParam String qrCodeBase64,
-            @RequestParam String studentId,
-            @RequestParam double latitude,
-            @RequestParam double longitude) {
-        try {
-            String result = attendanceRecordService.scanAndRecordAttendance(qrCodeBase64, studentId, latitude, longitude);
-            return ResponseEntity.ok(result);
-        } catch (IOException | NotFoundException e) {
-            return ResponseEntity.badRequest().body("Error when scanning QR code:" + e.getMessage());
+    public ResponseEntity<ApiResponse> scanAndRecordAttendance(
+            @RequestBody QRScanRequest qrScanRequest) {
+        try{
+            AttendanceResponse result = attendanceRecordService.
+                    scanAndRecordAttendance(qrScanRequest.getQrCode(), qrScanRequest.getStudentId(),
+                            qrScanRequest.getLatitude(), qrScanRequest.getLongitude());
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponse("Scan attendance record success", result));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse("Invalid input: " + e.getMessage(), null));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("QR code not found or unreadable", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Unexpected error: " + e.getMessage(), null));
         }
     }
     @PostMapping("/update/status")
-    public ResponseEntity<ApiResponse> scanAndRecordAttendance(
+    public ResponseEntity<ApiResponse> updateStatus(
             @RequestParam String id, @RequestParam AttendanceStatus attendanceStatus) {
         try{
             AttendanceRecord attendanceRecord = attendanceRecordService.updateStatus(id, attendanceStatus);

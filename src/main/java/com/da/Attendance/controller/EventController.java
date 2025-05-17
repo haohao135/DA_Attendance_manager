@@ -121,4 +121,14 @@ public class EventController {
                     .body(new ApiResponse("Delete event failed " + e.getMessage(), null));
         }
     }
+    @GetMapping("/get")
+    public ResponseEntity<ApiResponse> getById(@RequestParam String id){
+        try{
+            Event event = eventService.findEventById(id);
+            return ResponseEntity.ok(new ApiResponse("Get event success", event));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("Get event failed " + e.getMessage(), null));
+        }
+    }
 }
