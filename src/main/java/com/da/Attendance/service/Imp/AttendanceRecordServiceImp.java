@@ -51,23 +51,23 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
     public AttendanceResponse scanAndRecordAttendance(String qrContent, String studentId, double userLatitude, double userLongitude)
             throws IOException, NotFoundException {
         if (qrContent == null || qrContent.trim().isEmpty()) {
-            throw new IllegalArgumentException("invalid QR code Base64 string");
+            throw new IllegalArgumentException("Mã QR không hợp lệ Chuỗi Base64");
         }
         if (studentId == null || studentId.trim().isEmpty()) {
-            throw new IllegalArgumentException("studentId cannot be empty");
+            throw new IllegalArgumentException("studentId không được để trống");
         }
         if (userLatitude < -90 || userLatitude > 90 || userLongitude < -180 || userLongitude > 180) {
-            throw new IllegalArgumentException("invalid user coordinates");
+            throw new IllegalArgumentException("tọa độ người dùng không hợp lệ");
         }
 
         String sessionId = extractSessionId(qrContent);
         long expiresAtMillis = extractExpiresAt(qrContent);
         QrCode qrCode = qrCodeRepository.findBySessionId(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("QR code is invalid or does not exist"));
+                .orElseThrow(() -> new IllegalArgumentException("Mã QR không hợp lệ hoặc không tồn tại"));
         Instant now = Instant.now();
         Instant expiresAt = Instant.ofEpochMilli(expiresAtMillis);
         if (now.isAfter(expiresAt)) {
-            throw new IllegalArgumentException("QR code has expired");
+            throw new IllegalArgumentException("Mã QR đã hết hạn");
         }
         double qrLatitude = qrCode.getLatitude();
         double qrLongitude = qrCode.getLongitude();
@@ -75,24 +75,28 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
         double maxDistanceMeters = 100;
         if (distance > maxDistanceMeters) {
             throw new IllegalArgumentException(
-                    String.format("You are not in the correct roll call position (distance: %.2f meters)", distance));
+                    String.format("Bạn không ở đúng vị trí điểm danh (distance: %.2f meters)", distance));
         }
         AttendanceSession session = attendanceSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("roll call does not exist"));
         if (session.getAttendanceRecordsStudentId() == null || !session.getAttendanceRecordsStudentId().contains(studentId)) {
             throw new IllegalArgumentException("you are not on the class list for this roll call.");
         }
+
         Optional<AttendanceRecord> existingRecord = attendanceRecordRepository
                 .findByAttendanceSessionIdAndStudentId(sessionId, studentId);
         AttendanceRecord attendanceRecord = existingRecord
-                .orElseThrow(() -> new IllegalArgumentException("You do not exist in this session!"));
+                .orElseThrow(() -> new IllegalArgumentException("Bạn không có trong buổi học này!"));
+        if (attendanceRecord.getStatus() == AttendanceStatus.PRESENT) {
+            throw new IllegalArgumentException("Bạn đã điểm danh rồi.");
+        }
         attendanceRecord.setTimestamp(now);
         attendanceRecord.setLatitude(userLatitude);
         attendanceRecord.setLongitude(userLongitude);
         attendanceRecord.setMethod(AttendanceMethod.QR_CODE);
         attendanceRecord.setStatus(AttendanceStatus.PRESENT);
         attendanceRecordRepository.save(attendanceRecord);
-        return new AttendanceResponse("Roll call successful!", attendanceRecord.getTimestamp());
+        return new AttendanceResponse("Điểm danh thành công!", attendanceRecord.getTimestamp());
     }
 
     @Override
@@ -148,6 +152,15 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
         attendanceRecord.setStatus(AttendanceStatus.ABSENT);
         attendanceRecord.setMethod(AttendanceMethod.QR_CODE);
         attendanceRecordRepository.save(attendanceRecord);
+    }
+
+    @Override
+    public AttendanceRecord findById(String id) {
+        Optional<AttendanceRecord> attendanceRecords = attendanceRecordRepository.findById(id);
+        if(attendanceRecords.isEmpty()){
+            throw new RuntimeException("attendanceRecord not found");
+        }
+        return attendanceRecords.get();
     }
 
     private String extractSessionId(String qrContent) {
