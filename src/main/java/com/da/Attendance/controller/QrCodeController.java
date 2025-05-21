@@ -3,11 +3,11 @@ package com.da.Attendance.controller;
 import com.da.Attendance.dto.request.QrCode.QRScanRequest;
 import com.da.Attendance.dto.response.ApiResponse;
 import com.da.Attendance.dto.response.AttendanceRecordResponse.AttendanceResponse;
-import com.da.Attendance.model.AttendanceRecord;
-import com.da.Attendance.model.EventRecord;
-import com.da.Attendance.model.Notification;
+import com.da.Attendance.model.*;
 import com.da.Attendance.repository.AttendanceRecordRepository;
+import com.da.Attendance.repository.AttendanceSessionRepository;
 import com.da.Attendance.repository.EventRecordRepository;
+import com.da.Attendance.repository.EventRepository;
 import com.da.Attendance.service.AttendanceRecordService;
 import com.da.Attendance.service.EventRecordService;
 import com.da.Attendance.service.QrCodeService;
@@ -31,9 +31,9 @@ public class QrCodeController {
     @Autowired
     private EventRecordService eventRecordService;
     @Autowired
-    private AttendanceRecordRepository attendanceRecordRepository;
+    private AttendanceSessionRepository attendanceSessionRepository;
     @Autowired
-    private EventRecordRepository eventRecordRepository;
+    private EventRepository eventRepository;
 
     @PostMapping("/generate-classroom")
     public ResponseEntity<ApiResponse> generateQRCodeClassroom(@RequestParam String sessionId,
@@ -59,8 +59,8 @@ public class QrCodeController {
             }
             System.out.println(qrScanRequest.getQrCode() + "code nè");
             System.out.println(sessionId + "id nè");
-            AttendanceRecord attendanceRecord = attendanceRecordRepository.findById(sessionId).orElse(null);
-            if(attendanceRecord != null){
+            AttendanceSession attendanceSession = attendanceSessionRepository.findById(sessionId).orElse(null);
+            if(attendanceSession != null){
                 AttendanceResponse attendanceResponse = attendanceRecordService.scanAndRecordAttendance(
                         qrScanRequest.getQrCode(),
                         qrScanRequest.getStudentId(),
@@ -70,8 +70,8 @@ public class QrCodeController {
                 return ResponseEntity.status(HttpStatus.CREATED)
                         .body(new ApiResponse("Scan attendance record success", attendanceResponse));
             }
-            EventRecord eventRecord = eventRecordRepository.findById(sessionId).orElse(null);
-            if(eventRecord != null){
+            Event event = eventRepository.findById(sessionId).orElse(null);
+            if(event != null){
                 AttendanceResponse attendanceResponse = eventRecordService.scanAndRecordAttendance(
                         qrScanRequest.getQrCode(),
                         qrScanRequest.getStudentId(),
