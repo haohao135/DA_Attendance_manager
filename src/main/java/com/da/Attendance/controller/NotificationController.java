@@ -21,7 +21,7 @@ public class NotificationController {
     @PostMapping("/send")
     public ResponseEntity<ApiResponse> sendNotify(@RequestBody SendNotificationRequest sendNotificationRequest){
         try{
-            List<Notification> notificationList = notificationService.sendBulkNotification(sendNotificationRequest);
+            Notification notificationList = notificationService.sendBulkNotification(sendNotificationRequest);
             return ResponseEntity.ok(new ApiResponse("Send notification success", notificationList));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

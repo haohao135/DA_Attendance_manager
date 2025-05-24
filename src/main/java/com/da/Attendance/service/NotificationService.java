@@ -7,7 +7,7 @@ import com.da.Attendance.model.Notification;
 import java.util.List;
 
 public interface NotificationService {
-    List<Notification> sendBulkNotification(SendNotificationRequest sendNotificationRequest);
+    Notification sendBulkNotification(SendNotificationRequest sendNotificationRequest);
     List<Notification> getNotificationsByUserId(String userId);
     Notification getById(String id);
     Notification changeIsRead(String id);

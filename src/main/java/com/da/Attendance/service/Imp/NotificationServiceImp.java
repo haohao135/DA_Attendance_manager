@@ -1,6 +1,5 @@
 package com.da.Attendance.service.Imp;
 
-import com.corundumstudio.socketio.SocketIOServer;
 import com.da.Attendance.dto.request.Notification.SendNotificationRequest;
 import com.da.Attendance.dto.response.Notification.GroupedNotificationResponse;
 import com.da.Attendance.model.Notification;
@@ -9,6 +8,7 @@ import com.da.Attendance.repository.NotificationRepository;
 import com.da.Attendance.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -22,12 +22,12 @@ public class NotificationServiceImp implements NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
     @Autowired
-    private SocketIOServer socketIOServer;
+    private SimpMessagingTemplate messagingTemplate;
 
     @Override
-    public List<Notification> sendBulkNotification(SendNotificationRequest request) {
-        if (request.getStudentIds() == null || request.getStudentIds().isEmpty()) {
-            throw new IllegalArgumentException("student list cannot be null or empty.");
+    public Notification sendBulkNotification(SendNotificationRequest request) {
+        if (request.getStudentId() == null || request.getStudentId().isBlank()) {
+            throw new IllegalArgumentException("student ID cannot be null or empty.");
         }
         if (request.getTitle() == null || request.getTitle().isBlank()) {
             throw new IllegalArgumentException("title cannot be null or empty.");
@@ -42,27 +42,27 @@ public class NotificationServiceImp implements NotificationService {
             throw new IllegalArgumentException("invalid notification type.");
         }
 
-        List<Notification> notifications = new ArrayList<>();
-        for (String studentId : request.getStudentIds()) {
-            Notification notification = new Notification();
-            notification.setTitle(request.getTitle());
-            notification.setContent(request.getContent());
-            notification.setSenderId(request.getSenderId());
-            notification.setReceivedId(studentId);
-            notification.setType(request.getType());
-            notification.setCreateAt(Instant.now());
-            notification.setRead(false);
-            try {
-                socketIOServer.getRoomOperations(studentId).sendEvent("notification", notification);
-            } catch (Exception e) {
-                throw new RuntimeException("failed to send notifications", e);
-            }
-            notifications.add(notification);
+        Notification notification = new Notification();
+        notification.setTitle(request.getTitle());
+        notification.setContent(request.getContent());
+        notification.setSenderId(request.getSenderId());
+        notification.setReceivedId(request.getStudentId());
+        notification.setType(request.getType());
+        notification.setCreateAt(Instant.now());
+        notification.setRead(false);
+        try {
+            messagingTemplate.convertAndSendToUser(
+                    request.getStudentId(),
+                    "/queue/notifications",
+                    notification
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to send WebSocket to studentId " + request.getStudentId() + ": " + e.getMessage());
         }
         try {
-            return notificationRepository.saveAll(notifications);
+            return notificationRepository.save(notification);
         } catch (Exception e) {
-            throw new RuntimeException("failed to save notifications", e);
+            throw new RuntimeException("failed to save notification", e);
         }
     }
 

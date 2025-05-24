@@ -8,7 +8,7 @@ public class SendNotificationRequest {
     private String title;
     private String content;
     private String senderId;
-    private List<String> studentIds;
+    private String studentId;
     private NotificationType type;
 
     public String getTitle() {
@@ -35,12 +35,23 @@ public class SendNotificationRequest {
         this.senderId = senderId;
     }
 
-    public List<String> getStudentIds() {
-        return studentIds;
+    public SendNotificationRequest() {
     }
 
-    public void setStudentIds(List<String> studentIds) {
-        this.studentIds = studentIds;
+    public SendNotificationRequest(String title, String content, String senderId, String studentId, NotificationType type) {
+        this.title = title;
+        this.content = content;
+        this.senderId = senderId;
+        this.studentId = studentId;
+        this.type = type;
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 
     public NotificationType getType() {

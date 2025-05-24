@@ -57,8 +57,6 @@ public class QrCodeController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new ApiResponse("Invalid QR code format: " + e.getMessage(), null));
             }
-            System.out.println(qrScanRequest.getQrCode() + "code nè");
-            System.out.println(sessionId + "id nè");
             AttendanceSession attendanceSession = attendanceSessionRepository.findById(sessionId).orElse(null);
             if(attendanceSession != null){
                 AttendanceResponse attendanceResponse = attendanceRecordService.scanAndRecordAttendance(
