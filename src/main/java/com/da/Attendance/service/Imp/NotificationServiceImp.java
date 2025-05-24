@@ -50,20 +50,18 @@ public class NotificationServiceImp implements NotificationService {
         notification.setType(request.getType());
         notification.setCreateAt(Instant.now());
         notification.setRead(false);
+        Notification savedNotification = notificationRepository.save(notification);
         try {
             messagingTemplate.convertAndSendToUser(
                     request.getStudentId(),
                     "/queue/notifications",
-                    notification
+                    savedNotification
             );
         } catch (Exception e) {
             System.err.println("Failed to send WebSocket to studentId " + request.getStudentId() + ": " + e.getMessage());
         }
-        try {
-            return notificationRepository.save(notification);
-        } catch (Exception e) {
-            throw new RuntimeException("failed to save notification", e);
-        }
+        return savedNotification;
+
     }
 
     @Override
