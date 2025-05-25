@@ -1,19 +1,19 @@
 package com.da.Attendance.service.Imp;
 
 import com.da.Attendance.dto.response.AttendanceRecordResponse.AttendanceResponse;
-import com.da.Attendance.model.AttendanceSession;
-import com.da.Attendance.model.Event;
-import com.da.Attendance.model.EventRecord;
-import com.da.Attendance.model.QrCode;
+import com.da.Attendance.dto.response.User.UserAttendanceRecordResponse;
+import com.da.Attendance.model.*;
 import com.da.Attendance.model.enums.AttendanceMethod;
 import com.da.Attendance.model.enums.AttendanceStatus;
 import com.da.Attendance.repository.EventRecordRepository;
 import com.da.Attendance.repository.EventRepository;
 import com.da.Attendance.repository.QrCodeRepository;
+import com.da.Attendance.repository.UserRepository;
 import com.da.Attendance.service.EventRecordService;
 import com.da.Attendance.service.EventService;
 import com.google.zxing.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -30,6 +30,10 @@ public class EventRecordServiceImp implements EventRecordService {
     private QrCodeRepository qrCodeRepository;
     @Autowired
     private EventRepository eventRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @Override
     public AttendanceResponse scanAndRecordAttendance(String qrContent, String studentId, double userLatitude, double userLongitude) throws IOException, NotFoundException {
@@ -79,6 +83,20 @@ public class EventRecordServiceImp implements EventRecordService {
         eventRecord.setLongtitude(userLongitude);
         eventRecord.setAttendanceStatus(AttendanceStatus.PRESENT);
         eventRecordRepository.save(eventRecord);
+
+        Optional<User> users = userRepository.findById(studentId);
+        if(users.isEmpty()){
+            throw new RuntimeException("user not exists");
+        }
+        User user = users.get();
+
+        UserAttendanceRecordResponse userAttendanceRecordResponse = new UserAttendanceRecordResponse();
+        userAttendanceRecordResponse.setAttendanceRecordId(eventRecord.getId());
+        userAttendanceRecordResponse.setUser(user);
+        userAttendanceRecordResponse.setStatus(AttendanceStatus.PRESENT);
+
+        String destination = "/topic/attendance/" + sessionId;
+        messagingTemplate.convertAndSend(destination, userAttendanceRecordResponse);
         return new AttendanceResponse("Điểm danh thành công!", eventRecord.getTimeStamp());
     }
 

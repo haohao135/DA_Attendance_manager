@@ -2,16 +2,11 @@ package com.da.Attendance.service.Imp;
 
 import com.da.Attendance.dto.request.AttendanceRecord.AddAttendanceRecordRequest;
 import com.da.Attendance.dto.response.AttendanceRecordResponse.AttendanceResponse;
-import com.da.Attendance.model.AttendanceRecord;
-import com.da.Attendance.model.AttendanceSession;
-import com.da.Attendance.model.Event;
-import com.da.Attendance.model.QrCode;
+import com.da.Attendance.dto.response.User.UserAttendanceRecordResponse;
+import com.da.Attendance.model.*;
 import com.da.Attendance.model.enums.AttendanceMethod;
 import com.da.Attendance.model.enums.AttendanceStatus;
-import com.da.Attendance.repository.AttendanceRecordRepository;
-import com.da.Attendance.repository.AttendanceSessionRepository;
-import com.da.Attendance.repository.EventRepository;
-import com.da.Attendance.repository.QrCodeRepository;
+import com.da.Attendance.repository.*;
 import com.da.Attendance.service.AttendanceRecordService;
 import com.da.Attendance.service.AttendanceSessionService;
 import com.google.zxing.BinaryBitmap;
@@ -21,6 +16,7 @@ import com.google.zxing.NotFoundException;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,8 +40,10 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
     private EventRepository eventRepository;
     @Autowired
     private AttendanceSessionRepository attendanceSessionRepository;
-
-
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private UserRepository userRepository;
     @Override
     @Transactional
     public AttendanceResponse scanAndRecordAttendance(String qrContent, String studentId, double userLatitude, double userLongitude)
@@ -96,6 +94,20 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
         attendanceRecord.setMethod(AttendanceMethod.QR_CODE);
         attendanceRecord.setStatus(AttendanceStatus.PRESENT);
         attendanceRecordRepository.save(attendanceRecord);
+
+        Optional<User> users = userRepository.findById(studentId);
+        if(users.isEmpty()){
+            throw new RuntimeException("user not exists");
+        }
+        User user = users.get();
+
+        UserAttendanceRecordResponse userAttendanceRecordResponse = new UserAttendanceRecordResponse();
+        userAttendanceRecordResponse.setAttendanceRecordId(attendanceRecord.getId());
+        userAttendanceRecordResponse.setUser(user);
+        userAttendanceRecordResponse.setStatus(AttendanceStatus.PRESENT);
+
+        String destination = "/topic/attendance/" + sessionId;
+        messagingTemplate.convertAndSend(destination, userAttendanceRecordResponse);
         return new AttendanceResponse("Điểm danh thành công!", attendanceRecord.getTimestamp());
     }
 
