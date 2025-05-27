@@ -9,6 +9,7 @@ import com.da.Attendance.dto.response.User.UserLoginResponse;
 import com.da.Attendance.dto.response.User.UserRegisterResponse;
 import com.da.Attendance.model.AttendanceRecord;
 import com.da.Attendance.model.EventRecord;
+import com.da.Attendance.model.Image;
 import com.da.Attendance.model.User;
 import com.da.Attendance.model.enums.AttendanceMethod;
 import com.da.Attendance.model.enums.AttendanceStatus;
@@ -24,6 +25,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +47,8 @@ public class UserServiceImp implements UserService {
     private AttendanceRecordRepository attendanceRecordRepository;
     @Autowired
     private EventRecordRepository eventRecordRepository;
+    @Autowired
+    private ImageServiceImp imageServiceImp;
 
     @Override
     public UserRegisterResponse register(UserRegisterRequest userRegisterRequest) {
@@ -84,35 +88,37 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public void updateUserFullName(String id, String name) {
-        User user = getUserById(id);
+    public void updateUserFullName(String email, String name) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("user not found"));
         user.setFullName(name);
         userRepository.save(user);
     }
 
     @Override
-    public void updateUserPhoneNumber(String id, String phoneNumber) {
-        User user = getUserById(id);
+    public void updateUserPhoneNumber(String email, String phoneNumber) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("user not found"));
         user.setNumberPhone(phoneNumber);
         userRepository.save(user);
     }
 
     @Override
-    public void updateAvatar(String id, String avatarId) {
-        User user = getUserById(id);
+    public void updateAvatar(String email, String avatarId) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("user not found"));
         user.setAvatarId(avatarId);
         userRepository.save(user);
     }
 
-    @Override
-    public void changePassword(String id, ChangePasswordRequest changePasswordRequest) {
-        User user = getUserById(id);
-        if(!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())){
-            throw new RuntimeException("password is incorrect");
-        } else if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
-            throw new RuntimeException("new password not match");
+    public void changePassword(ChangePasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("user not found"));
+
+        if (!user.getPassword().equals(request.getOldPassword())) {
+            throw new RuntimeException("old password is incorrect");
         }
-        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        user.setPassword(request.getNewPassword());
         userRepository.save(user);
     }
 
@@ -245,5 +251,13 @@ public class UserServiceImp implements UserService {
     @Override
     public List<User> getUsersByRoleExcludingIds(UserRole role, List<String> excludeIds) {
         return userRepository.findByUserRoleInAndIdNotIn(Collections.singletonList(role), excludeIds);
+    }
+
+    @Override
+    public void addAvatar(String id, MultipartFile multipartFile) {
+        User user = getUserById(id);
+        Image image = imageServiceImp.addImage(multipartFile);
+        user.setAvatarId(image.getFileName());
+        userRepository.save(user);
     }
 }

@@ -9,16 +9,17 @@ import com.da.Attendance.dto.response.User.UserLoginResponse;
 import com.da.Attendance.dto.response.User.UserRegisterResponse;
 import com.da.Attendance.model.User;
 import com.da.Attendance.model.enums.UserRole;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface UserService {
     UserRegisterResponse register(UserRegisterRequest userRegisterRequest);
     UserLoginResponse login(UserLoginRequest userLoginRequest);
-    void updateUserFullName(String id, String name);
-    void updateUserPhoneNumber(String id, String phoneNumber);
-    void updateAvatar(String id, String avatarId);
-    void changePassword(String id, ChangePasswordRequest changePasswordRequest);
+    void updateUserFullName(String email, String name);
+    void updateUserPhoneNumber(String email, String phoneNumber);
+    void updateAvatar(String email, String avatarId);
+    void changePassword(ChangePasswordRequest changePasswordRequest);
     User getUserById(String id);
     List<User> getAllUser();
     List<User> getUserByRole(UserRole userRole);
@@ -32,4 +33,5 @@ public interface UserService {
     List<UserAttendanceRecordResponse> getUsersNoAttendanceEvent(String eventId);
     List<UserAttendanceRecordResponse> getUsersTookAttendanceEvent(String eventId);
     List<User> getUsersByRoleExcludingIds(UserRole role, List<String> excludeIds);
+    void addAvatar(String id, MultipartFile multipartFile);
 }

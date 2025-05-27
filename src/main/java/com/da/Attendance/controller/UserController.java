@@ -1,5 +1,6 @@
 package com.da.Attendance.controller;
 
+import com.da.Attendance.dto.request.User.ChangePasswordRequest;
 import com.da.Attendance.dto.request.User.FilterUserRequest;
 import com.da.Attendance.dto.request.User.UserUpdateAdminRequest;
 import com.da.Attendance.dto.response.ApiResponse;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,26 +22,40 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
-    @PostMapping("/full-name/{id}")
-    public ResponseEntity<ApiResponse> updateUserName(@PathVariable String id, @RequestBody String fullName){
+    @PostMapping("/full-name")
+    public ResponseEntity<ApiResponse> updateUserName(@RequestParam String email, @RequestParam String fullName){
         try {
-            userService.updateUserFullName(id, fullName);
+            userService.updateUserFullName(email, fullName);
             return ResponseEntity.ok(new ApiResponse("Update username success", null));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Update username failed " + e.getMessage(), null));
         }
     }
-    @PostMapping("/phone-number/{id}")
-    public ResponseEntity<ApiResponse> updatePhoneNumber(@PathVariable String id, @RequestBody String phoneNumber){
+    @PostMapping("/phone-number")
+    public ResponseEntity<ApiResponse> updatePhoneNumber(@RequestParam String email, @RequestParam String phoneNumber){
         try {
-            userService.updateUserPhoneNumber(id, phoneNumber);
+            userService.updateUserPhoneNumber(email, phoneNumber);
             return ResponseEntity.ok(new ApiResponse("Update phone number success", null));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Update phone number failed " + e.getMessage(), null));
         }
     }
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse> updatePassword(@RequestBody ChangePasswordRequest request){
+        try {
+            userService.changePassword(request);
+            return ResponseEntity.ok(new ApiResponse("Password changed successfully", null));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse("Update password failed: " + e.getMessage(), null));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Internal server error: " + e.getMessage(), null));
+        }
+    }
+
     @GetMapping("/by-email")
     public ResponseEntity<ApiResponse> getUserByEmail(@RequestParam String email){
         try {
@@ -150,6 +166,16 @@ public class UserController {
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse("Get users failed " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/add/avatar")
+    public ResponseEntity<ApiResponse> addAvatar(@RequestParam String id, @RequestParam MultipartFile multipartFile) {
+        try {
+            userService.addAvatar(id, multipartFile);
+            return ResponseEntity.ok(new ApiResponse("Add avatar success", null));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("Add avatar failed " + e.getMessage(), null));
         }
     }
 }

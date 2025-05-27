@@ -39,6 +39,7 @@ public class AuthController {
                     .body(new ApiResponse("Login failed " + e.getMessage(), null));
         }
     }
+
     @GetMapping("/me")
     public String getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();

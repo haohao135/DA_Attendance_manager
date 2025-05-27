@@ -1,17 +1,25 @@
 package com.da.Attendance.dto.request.User;
 
 public class ChangePasswordRequest {
+    private String email;
     private String oldPassword;
     private String newPassword;
-    private String confirmPassword;
 
     public ChangePasswordRequest() {
     }
 
-    public ChangePasswordRequest(String oldPassword, String newPassword, String confirmPassword) {
+    public ChangePasswordRequest(String email, String oldPassword, String newPassword) {
+        this.email = email;
         this.oldPassword = oldPassword;
         this.newPassword = newPassword;
-        this.confirmPassword = confirmPassword;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getOldPassword() {
@@ -28,13 +36,5 @@ public class ChangePasswordRequest {
 
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
-    }
-
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
     }
 }

@@ -44,8 +44,8 @@ public class ImageController {
         }
     }
 
-    @GetMapping("/download/{name}")
-    public ResponseEntity<?> download(@PathVariable String name){
+    @GetMapping("/download")
+    public ResponseEntity<?> download(@RequestParam String name){
         try{
             Image image = imageService.getImageByFileName(name);
             if(image == null){
