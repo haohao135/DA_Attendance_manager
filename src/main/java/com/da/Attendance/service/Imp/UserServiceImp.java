@@ -114,13 +114,13 @@ public class UserServiceImp implements UserService {
     public void changePassword(ChangePasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("user not found"));
-
-        if (!user.getPassword().equals(request.getOldPassword())) {
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             throw new RuntimeException("old password is incorrect");
         }
-        user.setPassword(request.getNewPassword());
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
+
 
     @Override
     public User getUserById(String id) {
