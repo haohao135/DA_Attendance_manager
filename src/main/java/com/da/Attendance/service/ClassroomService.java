@@ -2,8 +2,10 @@ package com.da.Attendance.service;
 
 import com.da.Attendance.dto.request.Classroom.AddClassroomRequest;
 import com.da.Attendance.dto.request.Classroom.UpdateClassroomRequest;
+import com.da.Attendance.dto.response.Report.ClassReport;
 import com.da.Attendance.model.Classroom;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 public interface ClassroomService {
@@ -20,4 +22,5 @@ public interface ClassroomService {
     void deleteClass(String id);
     List<Classroom> getAllClass();
     void updateClass(String id, UpdateClassroomRequest updateClassroomRequest);
+    ByteArrayInputStream exportAttendanceReport(String id);
 }

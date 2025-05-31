@@ -5,6 +5,8 @@ import com.da.Attendance.dto.request.Event.AddStudentsRequest;
 import com.da.Attendance.dto.request.Event.UpdateEventRequest;
 import com.da.Attendance.model.Event;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 
@@ -21,4 +23,5 @@ public interface EventService {
     List<Event> getUpcomingEventsByOrganizerId(String organizerId);
     List<Event> getPastEventsByOrganizerId(String organizerId);
     List<Event> getAllEvent();
+    ByteArrayInputStream exportEventAttendanceReport(String eventId) throws IOException;
 }

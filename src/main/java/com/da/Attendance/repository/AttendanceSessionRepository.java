@@ -11,4 +11,6 @@ public interface AttendanceSessionRepository extends MongoRepository<AttendanceS
     List<AttendanceSession> findByAttendanceRecordsStudentIdContains(String studentId);
     List<AttendanceSession> findByClassIdIn(List<String> classIds);
     List<AttendanceSession> findByClassId(String classId);
+    List<AttendanceSession> findByClassIdOrderByDateTimeAsc(String classId);
+
 }

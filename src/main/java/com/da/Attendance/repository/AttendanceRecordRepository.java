@@ -11,9 +11,11 @@ import java.util.Optional;
 
 @Repository
 public interface AttendanceRecordRepository extends MongoRepository<AttendanceRecord, String> {
+
     List<AttendanceRecord> findByAttendanceSessionIdAndStatus(String attendanceSessionId, AttendanceStatus status);
     List<AttendanceRecord> findByAttendanceSessionIdAndStatusIn(String sessionId, List<AttendanceStatus> statuses);
     boolean existsByStudentIdAndAttendanceSessionId(String studentId, String attendanceSessionId);
     List<AttendanceRecord> findByStudentIdAndStatus(String studentId, AttendanceStatus status);
+    List<AttendanceRecord> findByAttendanceSessionIdIn(List<String> sessionIds);
     Optional<AttendanceRecord> findByAttendanceSessionIdAndStudentId(String attendanceSessionId, String studentId);
 }

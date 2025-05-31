@@ -9,10 +9,14 @@ import com.da.Attendance.model.Classroom;
 import com.da.Attendance.model.Event;
 import com.da.Attendance.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -131,4 +135,19 @@ public class EventController {
                     .body(new ApiResponse("Get event failed " + e.getMessage(), null));
         }
     }
+    @GetMapping("/report")
+    public ResponseEntity<byte[]> downloadAttendanceReport(@RequestParam String eventId) throws IOException {
+        ByteArrayInputStream stream = eventService.exportEventAttendanceReport(eventId);
+        if (stream == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
+        String filename = "event_report_" + eventId + ".xlsx";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(stream.readAllBytes());
+    }
+
 }

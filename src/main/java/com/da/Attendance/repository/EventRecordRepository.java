@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EventRecordRepository extends MongoRepository<EventRecord, String> {
+    List<EventRecord> findByEventId(String eventId);
     List<EventRecord> findByEventIdAndAttendanceStatus(String eventId, AttendanceStatus attendanceStatus);
     List<EventRecord> findByStudentIdAndAttendanceStatus(String studentId, AttendanceStatus attendanceStatus);
     List<EventRecord> findByStudentIdAndAttendanceStatusIn(String studentId, List<AttendanceStatus> statuses);

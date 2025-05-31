@@ -5,12 +5,17 @@ import com.da.Attendance.dto.request.Classroom.UpdateClassroomRequest;
 import com.da.Attendance.dto.response.ApiResponse;
 import com.da.Attendance.model.Classroom;
 import com.da.Attendance.service.ClassroomService;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -148,5 +153,19 @@ public class ClassroomController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Update class failed " + e.getMessage(), null));
         }
+    }
+    @GetMapping("/report")
+    public ResponseEntity<byte[]> downloadAttendanceReport(@RequestParam String classId) {
+        ByteArrayInputStream stream = classroomService.exportAttendanceReport(classId);
+        if (stream == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+        String filename = "attendance_report_" + classId + ".xlsx";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(stream.readAllBytes());
     }
 }
