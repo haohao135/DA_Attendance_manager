@@ -25,10 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -68,13 +65,16 @@ public class EventServiceImp implements EventService {
     @Override
     public Event addStudent(String id, String studentId) {
         Event event = findEventById(id);
-        if (!event.getParticipantIds().contains(studentId)) {
-            event.getParticipantIds().add(studentId);
-            Event saveEvent = eventRepository.save(event);
-            eventRecordService.addOne(saveEvent, studentId);
+        Set<String> participantIds = new HashSet<>(event.getParticipantIds());
+        if (participantIds.add(studentId)) {
+            event.setParticipantIds(new ArrayList<>(participantIds));
+            Event savedEvent = eventRepository.save(event);
+            eventRecordService.addOne(savedEvent, studentId);
+            return savedEvent;
         }
         return event;
     }
+
 
     @Override
     public Event addStudentList(AddStudentsRequest addStudentsRequest) {

@@ -15,9 +15,7 @@ import com.da.Attendance.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -154,18 +152,29 @@ public class AttendanceSessionServiceImp implements AttendanceSessionService {
 
     @Override
     public AttendanceSession addOneStudent(String id, String studentId) {
-        AttendanceSession attendanceSession = getById(id);
-        if (!attendanceSession.getAttendanceRecordsStudentId().contains(studentId)) {
-            attendanceSession.getAttendanceRecordsStudentId().add(studentId);
-            AttendanceSession saveAttendanceSession = attendanceSessionRepository.save(attendanceSession);
-            Classroom classroom = classroomService.findClassById(attendanceSession.getClassId());
-            classroom.getStudentIds().add(studentId);
-            classroomRepository.save(classroom);
-            attendanceRecordService.addOne(attendanceSession, studentId);
+        AttendanceSession targetSession = getById(id);
+        String classId = targetSession.getClassId();
 
-            return saveAttendanceSession;
+        List<AttendanceSession> sessionsSameClass = attendanceSessionRepository.findByClassId(classId);
+
+        for (AttendanceSession session : sessionsSameClass) {
+            if (!session.getAttendanceRecordsStudentId().contains(studentId)) {
+                session.getAttendanceRecordsStudentId().add(studentId);
+                attendanceRecordService.addOne(session, studentId);
+            }
         }
-        return attendanceSession;
-    }
+        attendanceSessionRepository.saveAll(sessionsSameClass);
 
+        Classroom classroom = classroomService.findClassById(classId);
+        Set<String> studentIds = new HashSet<>(classroom.getStudentIds());
+        if (studentIds.add(studentId)) {
+            classroom.setStudentIds(new ArrayList<>(studentIds));
+            classroomRepository.save(classroom);
+        }
+
+        return sessionsSameClass.stream()
+                .filter(s -> s.getId().equals(id))
+                .findFirst()
+                .orElse(targetSession);
+    }
 }

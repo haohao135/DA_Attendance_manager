@@ -34,4 +34,5 @@ public interface UserService {
     List<UserAttendanceRecordResponse> getUsersTookAttendanceEvent(String eventId);
     List<User> getUsersByRoleExcludingIds(UserRole role, List<String> excludeIds);
     void addAvatar(String id, MultipartFile multipartFile);
+    UserLoginResponse loginWithGoogle(String idToken);
 }

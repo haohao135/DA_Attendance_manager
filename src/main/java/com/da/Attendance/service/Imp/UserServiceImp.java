@@ -20,17 +20,23 @@ import com.da.Attendance.repository.EventRecordRepository;
 import com.da.Attendance.repository.UserRepository;
 import com.da.Attendance.security.JwtUtil;
 import com.da.Attendance.service.UserService;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -260,4 +266,68 @@ public class UserServiceImp implements UserService {
         user.setAvatarId(image.getFileName());
         userRepository.save(user);
     }
+
+    @Override
+    public UserLoginResponse loginWithGoogle(String idTokenString) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier
+                    .Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
+                    .setAudience(Arrays.asList(
+                            "166233101707-lnku861um234bf76aa1p771mpn86ilrc.apps.googleusercontent.com",
+                            "166233101707-qtdou9h6t5da7b5048dq8ur9ur711i7b.apps.googleusercontent.com"
+
+                    ))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(idTokenString);
+            if (idToken == null) {
+                throw new RuntimeException("Invalid ID token");
+            }
+
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+            String pictureUrl = (String) payload.get("picture");
+
+            User user = userRepository.findByEmail(email).orElse(null);
+
+            if (user == null) {
+                user = new User();
+                user.setEmail(email);
+                user.setFullName(name);
+                user.setUserRole(Collections.singletonList(UserRole.USER));
+                user.setUserStatus(UserStatus.ACTIVE);
+
+                // tải ảnh avatar từ url, convert thành MultipartFile
+                MultipartFile avatarFile = downloadImageAsMultipartFile(pictureUrl);
+                Image image = imageServiceImp.addImage(avatarFile);
+                user.setAvatarId(image.getFileName());
+
+                user = userRepository.save(user);
+            }
+
+            if (user.getUserStatus() == UserStatus.LOCK) {
+                throw new RuntimeException("account is locked");
+            }
+
+            String token = jwtUtil.generateToken(user.getEmail(), user.getUserRole());
+            return new UserLoginResponse(user.getFullName(), token);
+        } catch (Exception e) {
+            throw new RuntimeException("Google login failed: " + e.getMessage());
+        }
+    }
+    private MultipartFile downloadImageAsMultipartFile(String imageUrl) throws IOException {
+        URL url = new URL(imageUrl);
+        String fileName = UUID.randomUUID() + ".jpg";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (InputStream is = url.openStream()) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                baos.write(buffer, 0, bytesRead);
+            }
+        }
+        return new MockMultipartFile(fileName, fileName, "image/jpeg", baos.toByteArray());
+    }
+
 }

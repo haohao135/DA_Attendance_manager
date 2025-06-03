@@ -1,5 +1,6 @@
 package com.da.Attendance.controller;
 
+import com.da.Attendance.dto.request.User.GoogleLoginRequest;
 import com.da.Attendance.dto.request.User.UserLoginRequest;
 import com.da.Attendance.dto.request.User.UserRegisterRequest;
 import com.da.Attendance.dto.response.ApiResponse;
@@ -37,6 +38,16 @@ public class AuthController {
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Login failed " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/login/google")
+    public ResponseEntity<ApiResponse> loginWithGoogle(@RequestBody GoogleLoginRequest request) {
+        try {
+            UserLoginResponse response = userService.loginWithGoogle(request.getIdToken());
+            return ResponseEntity.ok(new ApiResponse("Login with Google success", response));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse("Login with Google failed: " + e.getMessage(), null));
         }
     }
 
