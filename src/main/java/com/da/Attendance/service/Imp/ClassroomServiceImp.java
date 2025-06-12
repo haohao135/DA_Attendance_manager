@@ -12,6 +12,7 @@ import com.da.Attendance.repository.AttendanceRecordRepository;
 import com.da.Attendance.repository.AttendanceSessionRepository;
 import com.da.Attendance.repository.ClassroomRepository;
 import com.da.Attendance.repository.UserRepository;
+import com.da.Attendance.service.AttendanceRecordService;
 import com.da.Attendance.service.ClassroomService;
 import com.da.Attendance.service.UserService;
 import org.apache.poi.ss.usermodel.Row;
@@ -21,10 +22,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -41,6 +41,8 @@ public class ClassroomServiceImp implements ClassroomService {
     private AttendanceRecordRepository attendanceRecordRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AttendanceRecordService attendanceRecordService;
 
     @Override
     public Classroom findClassById(String id) {
@@ -105,28 +107,73 @@ public class ClassroomServiceImp implements ClassroomService {
     @Transactional
     public Classroom addStudent(String id, String studentId) {
         if (studentId == null || studentId.isBlank()) {
-            throw new IllegalArgumentException("student ID cannot be null or empty");
+            throw new IllegalArgumentException("Student ID cannot be null or empty");
         }
-        Classroom classroom = findClassById(id);
-        if (!classroom.getStudentIds().contains(studentId)) {
-            classroom.getStudentIds().add(studentId);
-            return classroomRepository.save(classroom);
-        }
-        throw new RuntimeException("student already exists in the class");
-    }
 
-    @Override
-    public Classroom addStudents(String id, List<String> studentIds) {
         Classroom classroom = findClassById(id);
-        List<String> currentStudents = classroom.getStudentIds();
-        for (String studentId : studentIds) {
-            if (!currentStudents.contains(studentId)) {
-                currentStudents.add(studentId);
+
+        if (classroom.getStudentIds().contains(studentId)) {
+            throw new RuntimeException("Student already exists in the class");
+        }
+
+        classroom.getStudentIds().add(studentId);
+        Classroom savedClassroom = classroomRepository.save(classroom);
+
+        List<AttendanceSession> sessions = attendanceSessionRepository.findByClassId(id);
+        for (AttendanceSession session : sessions) {
+            if (!session.getAttendanceRecordsStudentId().contains(studentId)) {
+                session.getAttendanceRecordsStudentId().add(studentId);
+                attendanceRecordService.addOne(session, studentId);
             }
         }
-        classroom.setStudentIds(currentStudents);
-        return classroomRepository.save(classroom);
+        attendanceSessionRepository.saveAll(sessions);
+
+        return savedClassroom;
     }
+
+
+    @Override
+    @Transactional
+    public Classroom addStudents(String id, List<String> studentIds) {
+        if (studentIds == null || studentIds.isEmpty()) {
+            throw new IllegalArgumentException("Student list cannot be null or empty");
+        }
+
+        Classroom classroom = findClassById(id);
+        Set<String> updatedStudentSet = new HashSet<>(classroom.getStudentIds());
+        boolean hasNewStudent = false;
+
+        for (String studentId : studentIds) {
+            if (studentId != null && !studentId.isBlank() && updatedStudentSet.add(studentId)) {
+                hasNewStudent = true;
+            }
+        }
+
+        if (hasNewStudent) {
+            classroom.setStudentIds(new ArrayList<>(updatedStudentSet));
+            classroomRepository.save(classroom);
+            List<AttendanceSession> sessions = attendanceSessionRepository.findByClassId(id);
+
+            for (AttendanceSession session : sessions) {
+                Set<String> sessionStudentIds = new HashSet<>(session.getAttendanceRecordsStudentId());
+                boolean sessionChanged = false;
+
+                for (String studentId : studentIds) {
+                    if (studentId != null && !studentId.isBlank() && sessionStudentIds.add(studentId)) {
+                        attendanceRecordService.addOne(session, studentId);
+                        sessionChanged = true;
+                    }
+                }
+                if (sessionChanged) {
+                    session.setAttendanceRecordsStudentId(new ArrayList<>(sessionStudentIds));
+                }
+            }
+            attendanceSessionRepository.saveAll(sessions);
+        }
+
+        return classroom;
+    }
+
 
     @Override
     @Transactional
@@ -135,20 +182,40 @@ public class ClassroomServiceImp implements ClassroomService {
             throw new IllegalArgumentException("student ID cannot be null or empty");
         }
         Classroom classroom = findClassById(id);
-        if (classroom.getStudentIds().remove(studentId)) {
-            classroomRepository.save(classroom);
-        } else {
-            throw new RuntimeException("student not found in the class");
+
+        boolean removedFromClass = classroom.getStudentIds().remove(studentId);
+        if (!removedFromClass) {
+            throw new RuntimeException("Student not found in the class");
         }
+        classroomRepository.save(classroom);
+        List<AttendanceSession> sessions = attendanceSessionRepository.findByClassId(id);
+
+        for (AttendanceSession session : sessions) {
+            List<String> studentIds = session.getAttendanceRecordsStudentId();
+            if (studentIds.contains(studentId)) {
+                studentIds.remove(studentId);
+                session.setAttendanceRecordsStudentId(studentIds);
+                attendanceRecordService.deleteOne(session, studentId);
+            }
+        }
+        attendanceSessionRepository.saveAll(sessions);
     }
 
+
     @Override
+    @Transactional
     public void deleteClass(String id) {
         if (!classroomRepository.existsById(id)) {
-            throw new RuntimeException("class not found");
+            throw new RuntimeException("Class not found");
         }
+        List<AttendanceSession> sessions = attendanceSessionRepository.findByClassId(id);
+        for (AttendanceSession session : sessions) {
+            attendanceRecordService.deleteAllBySessionId(session.getId());
+        }
+        attendanceSessionRepository.deleteAll(sessions);
         classroomRepository.deleteById(id);
     }
+
 
     @Override
     public List<Classroom> getAllClass() {
@@ -249,6 +316,33 @@ public class ClassroomServiceImp implements ClassroomService {
             return new ByteArrayInputStream(out.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException("Failed to export attendance report", e);
+        }
+    }
+    public void importStudentsFromCSV(String classroomId, MultipartFile file) throws IOException {
+        List<String> studentIds = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            String line;
+            boolean skipHeader = true;
+
+            while ((line = reader.readLine()) != null) {
+                if (skipHeader) {
+                    skipHeader = false;
+                    continue;
+                }
+
+                String email = line.trim();
+                if (!email.isEmpty()) {
+                    userRepository.findByEmail(email)
+                            .ifPresentOrElse(
+                                    user -> studentIds.add(user.getId()),
+                                    () -> System.out.println("user not found with email: " + email)
+                            );
+                }
+            }
+        }
+        if (!studentIds.isEmpty()) {
+            addStudents(classroomId, studentIds);
         }
     }
 

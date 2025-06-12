@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -149,5 +150,27 @@ public class EventController {
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(stream.readAllBytes());
     }
-
+    @PostMapping("/delete-student")
+    public ResponseEntity<ApiResponse> deleteOneStudent(@RequestParam String id, @RequestParam String studentId){
+        try{
+            eventService.removeStudent(id, studentId);
+            return ResponseEntity.ok(new ApiResponse("Delete student from event success", null));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("Delete student from event failed " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/import-students")
+    public ResponseEntity<ApiResponse> importStudentByCsv(
+            @RequestParam String id,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            eventService.importStudentsFromCSV(id, file);
+            return ResponseEntity.ok(
+                    new ApiResponse("Import students success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Import students failed: " + e.getMessage(), null));
+        }
+    }
 }

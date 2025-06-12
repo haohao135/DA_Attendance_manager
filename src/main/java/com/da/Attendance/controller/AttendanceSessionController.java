@@ -100,4 +100,14 @@ public class AttendanceSessionController {
                     .body(new ApiResponse("Add student to attendance session failed " + e.getMessage(), null));
         }
     }
+    @PostMapping("/delete-student")
+    public ResponseEntity<ApiResponse> deleteOneStudent(@RequestParam String id, @RequestParam String studentId){
+        try{
+            attendanceSessionService.deleteStudent(id, studentId);
+            return ResponseEntity.ok(new ApiResponse("Delete student from attendance session success", null));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Delete student from attendance session failed " + e.getMessage(), null));
+        }
+    }
 }

@@ -175,6 +175,20 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
         return attendanceRecords.get();
     }
 
+    @Override
+    public void deleteOne(AttendanceSession attendanceSession, String studentId) {
+        Optional<AttendanceRecord> recordOpt = attendanceRecordRepository.findByAttendanceSessionIdAndStudentId(
+                attendanceSession.getId(), studentId
+        );
+
+        recordOpt.ifPresent(attendanceRecordRepository::delete);
+    }
+
+    @Override
+    public void deleteAllBySessionId(String sessionId) {
+        attendanceRecordRepository.deleteByAttendanceSessionId(sessionId);
+    }
+
     private String extractSessionId(String qrContent) {
         String[] parts = qrContent.split("&");
         for (String part : parts) {

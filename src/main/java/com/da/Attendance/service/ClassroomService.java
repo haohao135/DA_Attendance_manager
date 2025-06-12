@@ -4,8 +4,10 @@ import com.da.Attendance.dto.request.Classroom.AddClassroomRequest;
 import com.da.Attendance.dto.request.Classroom.UpdateClassroomRequest;
 import com.da.Attendance.dto.response.Report.ClassReport;
 import com.da.Attendance.model.Classroom;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 public interface ClassroomService {
@@ -23,4 +25,5 @@ public interface ClassroomService {
     List<Classroom> getAllClass();
     void updateClass(String id, UpdateClassroomRequest updateClassroomRequest);
     ByteArrayInputStream exportAttendanceReport(String id);
+    void importStudentsFromCSV(String classroomId, MultipartFile file) throws IOException;
 }

@@ -12,6 +12,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -94,8 +95,8 @@ public class ClassroomController {
                     .body(new ApiResponse("Update teacher failed " + e.getMessage(), null));
         }
     }
-    @PostMapping("/{id}/add-student")
-    public ResponseEntity<ApiResponse> addStudent(@PathVariable String id, @RequestParam String studentId){
+    @PostMapping("/add-student")
+    public ResponseEntity<ApiResponse> addStudent(@RequestParam String id, @RequestParam String studentId){
         try{
             Classroom classroom = classroomService.addStudent(id, studentId);
             return ResponseEntity.ok(new ApiResponse("Add student success", classroom));
@@ -112,16 +113,6 @@ public class ClassroomController {
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Add students failed " + e.getMessage(), null));
-        }
-    }
-    @PostMapping("/{id}/delete-student")
-    public ResponseEntity<ApiResponse> deleteStudent(@PathVariable String id, @RequestParam String studentId){
-        try{
-            classroomService.deleteStudent(id, studentId);
-            return ResponseEntity.ok(new ApiResponse("Delete student success", null));
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse("Delete student failed " + e.getMessage(), null));
         }
     }
     @PostMapping("/delete")
@@ -167,5 +158,36 @@ public class ClassroomController {
                 .contentType(MediaType.parseMediaType(
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(stream.readAllBytes());
+    }
+    @PostMapping("/delete-student")
+    public ResponseEntity<ApiResponse> deleteStudent(
+            @RequestParam String id,
+            @RequestParam String studentId) {
+        try {
+            if (id == null || id.isBlank() || studentId == null || studentId.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse("Class ID and Student ID must not be empty", null));
+            }
+
+            classroomService.deleteStudent(id, studentId);
+            return ResponseEntity.ok(
+                    new ApiResponse("Delete student from class success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Delete student from class failed: " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/import-students")
+    public ResponseEntity<ApiResponse> importStudentByCsv(
+            @RequestParam String id,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            classroomService.importStudentsFromCSV(id, file);
+            return ResponseEntity.ok(
+                    new ApiResponse("Import students success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Import students failed: " + e.getMessage(), null));
+        }
     }
 }

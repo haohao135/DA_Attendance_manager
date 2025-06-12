@@ -19,4 +19,6 @@ public interface AttendanceRecordService {
     AttendanceRecord updateStatus(String id, AttendanceStatus attendanceStatus);
     void addOne(AttendanceSession attendanceSession, String studentId);
     AttendanceRecord findById(String id);
+    void deleteOne(AttendanceSession attendanceSession, String studentId);
+    void deleteAllBySessionId(String sessionId);
 }

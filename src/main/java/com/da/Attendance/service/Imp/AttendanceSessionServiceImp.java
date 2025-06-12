@@ -177,4 +177,26 @@ public class AttendanceSessionServiceImp implements AttendanceSessionService {
                 .findFirst()
                 .orElse(targetSession);
     }
+
+    @Override
+    public void deleteStudent(String id, String studentId) {
+        AttendanceSession targetSession = getById(id);
+        String classId = targetSession.getClassId();
+        List<AttendanceSession> sessionsSameClass = attendanceSessionRepository.findByClassId(classId);
+
+        for (AttendanceSession session : sessionsSameClass) {
+            if (session.getAttendanceRecordsStudentId().contains(studentId)) {
+                session.getAttendanceRecordsStudentId().remove(studentId);
+                attendanceRecordService.deleteOne(session, studentId);
+            }
+        }
+        attendanceSessionRepository.saveAll(sessionsSameClass);
+        Classroom classroom = classroomService.findClassById(classId);
+        Set<String> studentIds = new HashSet<>(classroom.getStudentIds());
+        if (studentIds.remove(studentId)) {
+            classroom.setStudentIds(new ArrayList<>(studentIds));
+            classroomRepository.save(classroom);
+        }
+    }
+
 }

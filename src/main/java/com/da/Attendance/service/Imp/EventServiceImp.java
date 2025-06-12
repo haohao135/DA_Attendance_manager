@@ -3,6 +3,7 @@ package com.da.Attendance.service.Imp;
 import com.da.Attendance.dto.request.Event.AddEventRequest;
 import com.da.Attendance.dto.request.Event.AddStudentsRequest;
 import com.da.Attendance.dto.request.Event.UpdateEventRequest;
+import com.da.Attendance.model.Classroom;
 import com.da.Attendance.model.Event;
 import com.da.Attendance.model.EventRecord;
 import com.da.Attendance.model.User;
@@ -16,14 +17,12 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.xmlbeans.impl.xb.xsdschema.Attribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -79,13 +78,24 @@ public class EventServiceImp implements EventService {
     @Override
     public Event addStudentList(AddStudentsRequest addStudentsRequest) {
         Event event = findEventById(addStudentsRequest.getId());
+        Set<String> participantIds = new HashSet<>(event.getParticipantIds());
+        boolean updated = false;
+
         for (String studentId : addStudentsRequest.getStudentIds()) {
-            if (!event.getParticipantIds().contains(studentId)) {
-                event.getParticipantIds().add(studentId);
+            if (studentId != null && !studentId.isBlank() && participantIds.add(studentId)) {
+                eventRecordService.addOne(event, studentId);
+                updated = true;
             }
         }
-        return eventRepository.save(event);
+
+        if (updated) {
+            event.setParticipantIds(new ArrayList<>(participantIds));
+            return eventRepository.save(event);
+        }
+
+        return event;
     }
+
 
     @Override
     public Event updateEvent(String id, UpdateEventRequest updateEventRequest) {
@@ -191,5 +201,50 @@ public class EventServiceImp implements EventService {
         workbook.close();
 
         return new ByteArrayInputStream(out.toByteArray());
+    }
+
+    @Override
+    public void removeStudent(String id, String studentId) {
+        Event event = findEventById(id);
+        Set<String> participantIds = new HashSet<>(event.getParticipantIds());
+        if (participantIds.remove(studentId)) {
+            event.setParticipantIds(new ArrayList<>(participantIds));
+            Event savedEvent = eventRepository.save(event);
+            eventRecordService.removeOne(savedEvent, studentId);
+        }
+
+    }
+
+    @Override
+    public void importStudentsFromCSV(String eventId, MultipartFile file) throws IOException {
+        List<String> studentIds = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            String line;
+            boolean skipHeader = true;
+
+            while ((line = reader.readLine()) != null) {
+                if (skipHeader) {
+                    skipHeader = false;
+                    continue;
+                }
+
+                String email = line.trim();
+                if (!email.isEmpty()) {
+                    userRepository.findByEmail(email)
+                            .ifPresentOrElse(
+                                    user -> studentIds.add(user.getId()),
+                                    () -> System.out.println("user not found with email: " + email)
+                            );
+                }
+            }
+        }
+
+        if (!studentIds.isEmpty()) {
+            AddStudentsRequest request = new AddStudentsRequest();
+            request.setId(eventId);
+            request.setStudentIds(studentIds);
+            addStudentList(request);
+        }
     }
 }

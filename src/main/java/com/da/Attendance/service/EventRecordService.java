@@ -14,4 +14,5 @@ public interface EventRecordService {
     boolean addOne(Event event, String studentId);
     EventRecord updateStatus(String id, AttendanceStatus attendanceStatus);
     EventRecord findById(String id);
+    void removeOne(Event event, String studentId);
 }

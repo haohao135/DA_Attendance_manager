@@ -144,6 +144,12 @@ public class EventRecordServiceImp implements EventRecordService {
         }
         return eventRecords.get();
     }
+
+    @Override
+    public void removeOne(Event event, String studentId) {
+        eventRecordRepository.deleteByEventIdAndStudentId(event.getId(), studentId);
+    }
+
     private String extractSessionId(String qrContent) {
         String[] parts = qrContent.split("&");
         for (String part : parts) {

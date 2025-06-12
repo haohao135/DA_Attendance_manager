@@ -25,6 +25,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -55,6 +56,9 @@ public class UserServiceImp implements UserService {
     private EventRecordRepository eventRecordRepository;
     @Autowired
     private ImageServiceImp imageServiceImp;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
 
     @Override
     public UserRegisterResponse register(UserRegisterRequest userRegisterRequest) {
@@ -265,6 +269,11 @@ public class UserServiceImp implements UserService {
         Image image = imageServiceImp.addImage(multipartFile);
         user.setAvatarId(image.getFileName());
         userRepository.save(user);
+        Map<String, String> payload = Map.of(
+                "userId", user.getId(),
+                "avatarUrl", user.getAvatarId()
+        );
+        messagingTemplate.convertAndSend("/topic/avatar-update", payload);
     }
 
     @Override
@@ -272,12 +281,9 @@ public class UserServiceImp implements UserService {
         try {
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier
                     .Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
-                    .setAudience(Arrays.asList(
-                            "166233101707-lnku861um234bf76aa1p771mpn86ilrc.apps.googleusercontent.com",
-                            "166233101707-qtdou9h6t5da7b5048dq8ur9ur711i7b.apps.googleusercontent.com"
-
-                    ))
+                    .setAudience(Collections.singletonList("166233101707-lnku861um234bf76aa1p771mpn86ilrc.apps.googleusercontent.com"))
                     .build();
+
 
             GoogleIdToken idToken = verifier.verify(idTokenString);
             if (idToken == null) {

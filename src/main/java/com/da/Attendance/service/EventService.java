@@ -4,6 +4,7 @@ import com.da.Attendance.dto.request.Event.AddEventRequest;
 import com.da.Attendance.dto.request.Event.AddStudentsRequest;
 import com.da.Attendance.dto.request.Event.UpdateEventRequest;
 import com.da.Attendance.model.Event;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,4 +25,6 @@ public interface EventService {
     List<Event> getPastEventsByOrganizerId(String organizerId);
     List<Event> getAllEvent();
     ByteArrayInputStream exportEventAttendanceReport(String eventId) throws IOException;
+    void removeStudent(String id, String studentId);
+    void importStudentsFromCSV(String eventId, MultipartFile file) throws IOException;
 }

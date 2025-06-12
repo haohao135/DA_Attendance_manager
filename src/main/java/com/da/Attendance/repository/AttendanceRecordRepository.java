@@ -17,5 +17,6 @@ public interface AttendanceRecordRepository extends MongoRepository<AttendanceRe
     boolean existsByStudentIdAndAttendanceSessionId(String studentId, String attendanceSessionId);
     List<AttendanceRecord> findByStudentIdAndStatus(String studentId, AttendanceStatus status);
     List<AttendanceRecord> findByAttendanceSessionIdIn(List<String> sessionIds);
+    void deleteByAttendanceSessionId(String sessionId);
     Optional<AttendanceRecord> findByAttendanceSessionIdAndStudentId(String attendanceSessionId, String studentId);
 }
