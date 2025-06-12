@@ -6,6 +6,8 @@ import com.da.Attendance.dto.request.User.UserRegisterRequest;
 import com.da.Attendance.dto.response.ApiResponse;
 import com.da.Attendance.dto.response.User.UserLoginResponse;
 import com.da.Attendance.dto.response.User.UserRegisterResponse;
+import com.da.Attendance.model.User;
+import com.da.Attendance.service.OtpService;
 import com.da.Attendance.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private OtpService otpService;
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@RequestBody UserRegisterRequest userRegisterRequest){
         try {
@@ -58,6 +62,35 @@ public class AuthController {
             return userDetails.getUsername();
         } else {
             return "No user logged in";
+        }
+    }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        try {
+            User user = userService.getUserByEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse("Email not found", null));
+            }
+            otpService.generateAndSendOtp(email, user.getId());
+            return ResponseEntity.ok(new ApiResponse("Send otp success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Send otp failed: " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestParam String userId, @RequestParam String otp) {
+        try {
+            boolean valid = otpService.verifyOtp(userId, otp);
+            if (!valid) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse("OTP is invalid or expired", null));
+            }
+            return ResponseEntity.ok(new ApiResponse("OTP is valid, you can change password", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("OTP authentication error: " + e.getMessage(), null));
         }
     }
 }
