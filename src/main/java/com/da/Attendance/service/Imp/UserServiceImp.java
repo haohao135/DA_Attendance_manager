@@ -131,6 +131,14 @@ public class UserServiceImp implements UserService {
         userRepository.save(user);
     }
 
+    @Override
+    public void changePasswordByOtp(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("user not found"));
+        user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
+    }
+
 
     @Override
     public User getUserById(String id) {

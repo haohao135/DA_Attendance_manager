@@ -20,6 +20,7 @@ public interface UserService {
     void updateUserPhoneNumber(String email, String phoneNumber);
     void updateAvatar(String email, String avatarId);
     void changePassword(ChangePasswordRequest changePasswordRequest);
+    void changePasswordByOtp(String email, String password);
     User getUserById(String id);
     List<User> getAllUser();
     List<User> getUserByRole(UserRole userRole);

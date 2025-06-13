@@ -93,4 +93,24 @@ public class AuthController {
                     .body(new ApiResponse("OTP authentication error: " + e.getMessage(), null));
         }
     }
+    @GetMapping("/by-email")
+    public ResponseEntity<ApiResponse> getUserByEmail(@RequestParam String email){
+        try {
+            User user = userService.getUserByEmail(email);
+            return ResponseEntity.ok(new ApiResponse("Get user success", user));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("Get user failed " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePasswordByOtp(@RequestParam String email, @RequestParam String password) {
+        try {
+            userService.changePasswordByOtp(email, password);
+            return ResponseEntity.ok(new ApiResponse("Change password success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Change password error: " + e.getMessage(), null));
+        }
+    }
 }
