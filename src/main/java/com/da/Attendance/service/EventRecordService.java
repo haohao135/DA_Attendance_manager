@@ -15,4 +15,6 @@ public interface EventRecordService {
     EventRecord updateStatus(String id, AttendanceStatus attendanceStatus);
     EventRecord findById(String id);
     void removeOne(Event event, String studentId);
+    AttendanceResponse scanFromStudent(String qrContent, String eventId, double expectedLatitude,
+                                       double expectedLongitude);
 }

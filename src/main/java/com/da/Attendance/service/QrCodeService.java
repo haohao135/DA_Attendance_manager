@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface QrCodeService {
     String generateQRCode(String sessionId, double latitude, double longitude) throws WriterException;
+    String generateQRCodeAttendance(String userId, double latitude, double longitude) throws WriterException;
     Optional<QrCode> getQRCodeBySession(String sessionId);
 }

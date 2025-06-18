@@ -4,9 +4,7 @@ import com.da.Attendance.dto.request.QrCode.QRScanRequest;
 import com.da.Attendance.dto.response.ApiResponse;
 import com.da.Attendance.dto.response.AttendanceRecordResponse.AttendanceResponse;
 import com.da.Attendance.model.*;
-import com.da.Attendance.repository.AttendanceRecordRepository;
 import com.da.Attendance.repository.AttendanceSessionRepository;
-import com.da.Attendance.repository.EventRecordRepository;
 import com.da.Attendance.repository.EventRepository;
 import com.da.Attendance.service.AttendanceRecordService;
 import com.da.Attendance.service.EventRecordService;
@@ -41,6 +39,18 @@ public class QrCodeController {
                                               @RequestParam double longitude) throws WriterException {
         try{
             String qrCodeBase64 = qrCodeService.generateQRCode(sessionId, latitude, longitude);
+            return ResponseEntity.ok(new ApiResponse("Generate qrCode success", qrCodeBase64));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Generate qrCode failed " + e.getMessage(), null));
+        }
+    }
+    @PostMapping("/generate-attendance")
+    public ResponseEntity<ApiResponse> generateQRCodeAttendance(@RequestParam String userId,
+                                                               @RequestParam double latitude,
+                                                               @RequestParam double longitude) throws WriterException {
+        try{
+            String qrCodeBase64 = qrCodeService.generateQRCodeAttendance(userId, latitude, longitude);
             return ResponseEntity.ok(new ApiResponse("Generate qrCode success", qrCodeBase64));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -86,6 +96,8 @@ public class QrCodeController {
                     .body(new ApiResponse("Scan qrCode failed " + e.getMessage(), null));
         }
     }
+
+
     public String extractSessionId(String qrCode) {
         if (qrCode == null) return null;
         String[] parts = qrCode.split("&");

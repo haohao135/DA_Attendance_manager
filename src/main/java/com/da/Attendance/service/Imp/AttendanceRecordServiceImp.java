@@ -73,7 +73,7 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
         double maxDistanceMeters = 100;
         if (distance > maxDistanceMeters) {
             throw new IllegalArgumentException(
-                    String.format("Bạn không ở đúng vị trí điểm danh (distance: %.2f meters)", distance));
+                    String.format("Bạn không ở trong phạm vi điểm danh"));
         }
         AttendanceSession session = attendanceSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("roll call does not exist"));

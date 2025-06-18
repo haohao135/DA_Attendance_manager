@@ -53,6 +53,27 @@ public class QrCodeServiceImp implements QrCodeService {
             throw new RuntimeException("Lỗi tạo QR Code", e);
         }
     }
+
+    @Override
+    public String generateQRCodeAttendance(String userId, double latitude, double longitude) throws WriterException {
+        if (userId == null || userId.trim().isEmpty()) {
+            throw new IllegalArgumentException("user ID cannot be empty");
+        }
+        if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            throw new IllegalArgumentException("invalid coordinates");
+        }
+        String qrContent = "userId=" + userId + "&latitude=" + latitude + "&longitude=" + longitude;
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(qrContent, BarcodeFormat.QR_CODE, 200, 200);
+        try (ByteArrayOutputStream bass = new ByteArrayOutputStream()) {
+            BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+            ImageIO.write(qrImage, "PNG", bass);
+            return Base64.getEncoder().encodeToString(bass.toByteArray());
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi tạo QR Code", e);
+        }
+    }
+
     @Override
     public Optional<QrCode> getQRCodeBySession(String sessionId) {
         return qrCodeRepository.findBySessionId(sessionId);
