@@ -52,12 +52,12 @@ public class ClassroomServiceImp implements ClassroomService {
 
     @Override
     public List<Classroom> findByStudentId(String studentId) {
-        return classroomRepository.findByStudentIdsContaining(studentId);
+        return classroomRepository.findByStudentIdsContainingAndIsActiveTrue(studentId);
     }
 
     @Override
     public List<Classroom> findByTeacherId(String teacherId) {
-        return classroomRepository.findByTeacherId(teacherId);
+        return classroomRepository.findByTeacherIdAndIsActiveTrue(teacherId);
     }
 
     @Override
@@ -346,4 +346,10 @@ public class ClassroomServiceImp implements ClassroomService {
         }
     }
 
+    @Override
+    public void updateIsActive(String id, boolean isActive) {
+        Classroom classroom = findClassById(id);
+        classroom.setActive(isActive);
+        classroomRepository.save(classroom);
+    }
 }

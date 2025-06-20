@@ -190,4 +190,17 @@ public class ClassroomController {
                     .body(new ApiResponse("Import students failed: " + e.getMessage(), null));
         }
     }
+    @PostMapping("/active")
+    public ResponseEntity<ApiResponse> updateActive(
+            @RequestParam String id,
+            @RequestParam boolean isActive) {
+        try {
+            classroomService.updateIsActive(id, isActive);
+            return ResponseEntity.ok(
+                    new ApiResponse("Update active success", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Update active failed: " + e.getMessage(), null));
+        }
+    }
 }

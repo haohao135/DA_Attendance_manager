@@ -14,8 +14,8 @@ public class Classroom {
     private String teacherId;
     private String classId;
     private String room;
+    private boolean isActive = true;
     private List<String> studentIds = new ArrayList<>();
-
     public Classroom() {}
 
     public Classroom(String className, String classId) {
@@ -23,12 +23,13 @@ public class Classroom {
         this.classId = classId;
     }
 
-    public Classroom(String id, String className, String teacherId, String classId, String room, List<String> studentIds) {
+    public Classroom(String id, String className, String teacherId, String classId, String room, boolean isActive, List<String> studentIds) {
         this.id = id;
         this.className = className;
         this.teacherId = teacherId;
         this.classId = classId;
         this.room = room;
+        this.isActive = isActive;
         this.studentIds = studentIds;
     }
 
@@ -78,5 +79,13 @@ public class Classroom {
 
     public void setRoom(String room) {
         this.room = room;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

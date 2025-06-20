@@ -10,5 +10,9 @@ import java.util.List;
 public interface ClassroomRepository extends MongoRepository<Classroom, String> {
     List<Classroom> findByStudentIdsContaining(String studentId);
     List<Classroom> findByTeacherId(String teacherId);
+    List<Classroom> findByStudentIdsContainingAndIsActiveTrue(String studentId);
+
+    List<Classroom> findByTeacherIdAndIsActiveTrue(String teacherId);
+
 
 }

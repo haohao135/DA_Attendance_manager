@@ -26,4 +26,5 @@ public interface ClassroomService {
     void updateClass(String id, UpdateClassroomRequest updateClassroomRequest);
     ByteArrayInputStream exportAttendanceReport(String id);
     void importStudentsFromCSV(String classroomId, MultipartFile file) throws IOException;
+    void updateIsActive(String id, boolean isActive);
 }
