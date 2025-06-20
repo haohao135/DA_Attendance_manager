@@ -186,7 +186,7 @@ public class EventRecordServiceImp implements EventRecordService {
 
         double distance = calculateDistance(latitude, longitude, expectedLat, expectedLng);
         if (distance > 50) {
-            return new AttendanceResponse("Vị trí điểm danh quá xa (" + Math.round(distance) + "m)", null);
+            throw new IllegalArgumentException("Vị trí điểm danh quá xa (" + Math.round(distance) + "m)", null);
         }
 
         Event event = eventRepository.findById(eventId)
