@@ -8,6 +8,7 @@ public class GroupedNotificationResponse {
     private String title;
     private String content;
     private String senderId;
+    private String receiverId;
     private NotificationType type;
     private Instant createAt;
     private long totalSent;
@@ -15,10 +16,11 @@ public class GroupedNotificationResponse {
     public GroupedNotificationResponse() {
     }
 
-    public GroupedNotificationResponse(String title, String content, String senderId, NotificationType type, Instant createAt, long totalSent) {
+    public GroupedNotificationResponse(String title, String content, String senderId, String receiverId, NotificationType type, Instant createAt, long totalSent) {
         this.title = title;
         this.content = content;
         this.senderId = senderId;
+        this.receiverId = receiverId;
         this.type = type;
         this.createAt = createAt;
         this.totalSent = totalSent;
@@ -70,5 +72,13 @@ public class GroupedNotificationResponse {
 
     public void setTotalSent(long totalSent) {
         this.totalSent = totalSent;
+    }
+
+    public String getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(String receiverId) {
+        this.receiverId = receiverId;
     }
 }

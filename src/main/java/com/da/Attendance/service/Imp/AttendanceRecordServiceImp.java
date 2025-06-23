@@ -49,7 +49,7 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
     public AttendanceResponse scanAndRecordAttendance(String qrContent, String studentId, double userLatitude, double userLongitude)
             throws IOException, NotFoundException {
         if (qrContent == null || qrContent.trim().isEmpty()) {
-            throw new IllegalArgumentException("Mã QR không hợp lệ Chuỗi Base64");
+            throw new IllegalArgumentException("mã QR không hợp lệ Chuỗi Base64");
         }
         if (studentId == null || studentId.trim().isEmpty()) {
             throw new IllegalArgumentException("studentId không được để trống");
@@ -61,32 +61,32 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
         String sessionId = extractSessionId(qrContent);
         long expiresAtMillis = extractExpiresAt(qrContent);
         QrCode qrCode = qrCodeRepository.findBySessionId(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("Mã QR không hợp lệ hoặc không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("mã QR không hợp lệ hoặc không tồn tại"));
         Instant now = Instant.now();
         Instant expiresAt = Instant.ofEpochMilli(expiresAtMillis);
         if (now.isAfter(expiresAt)) {
-            throw new IllegalArgumentException("Mã QR đã hết hạn");
+            throw new IllegalArgumentException("mã QR đã hết hạn");
         }
         double qrLatitude = qrCode.getLatitude();
         double qrLongitude = qrCode.getLongitude();
         double distance = calculateDistance(qrLatitude, qrLongitude, userLatitude, userLongitude);
-        double maxDistanceMeters = 100;
+        double maxDistanceMeters = 50;
         if (distance > maxDistanceMeters) {
             throw new IllegalArgumentException(
-                    String.format("Bạn không ở trong phạm vi điểm danh"));
+                    String.format("bạn không ở trong phạm vi điểm danh"));
         }
         AttendanceSession session = attendanceSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("roll call does not exist"));
         if (session.getAttendanceRecordsStudentId() == null || !session.getAttendanceRecordsStudentId().contains(studentId)) {
-            throw new IllegalArgumentException("you are not on the class list for this roll call.");
+            throw new IllegalArgumentException("bạn không có tên trong danh sách lớp học cho lần điểm danh này");
         }
 
         Optional<AttendanceRecord> existingRecord = attendanceRecordRepository
                 .findByAttendanceSessionIdAndStudentId(sessionId, studentId);
         AttendanceRecord attendanceRecord = existingRecord
-                .orElseThrow(() -> new IllegalArgumentException("Bạn không có trong buổi học này!"));
+                .orElseThrow(() -> new IllegalArgumentException("bạn không có trong buổi học này!"));
         if (attendanceRecord.getStatus() == AttendanceStatus.PRESENT) {
-            throw new IllegalArgumentException("Bạn đã điểm danh rồi.");
+            throw new IllegalArgumentException("bạn đã điểm danh rồi");
         }
         attendanceRecord.setTimestamp(now);
         attendanceRecord.setLatitude(userLatitude);

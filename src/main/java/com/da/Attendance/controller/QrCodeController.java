@@ -87,13 +87,13 @@ public class QrCodeController {
                         qrScanRequest.getLongitude()
                 );
                 return ResponseEntity.status(HttpStatus.CREATED)
-                        .body(new ApiResponse("Scan event record success", attendanceResponse));
+                        .body(new ApiResponse("Quét bản ghi sự kiện thành công", attendanceResponse));
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse("Invalid or expired QR code", null));
+                    .body(new ApiResponse("Mã QR không hợp lệ hoặc đã hết hạn", null));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse("Scan qrCode failed " + e.getMessage(), null));
+                    .body(new ApiResponse("Quét mã thất bại: " + e.getMessage(), null));
         }
     }
 

@@ -39,7 +39,7 @@ public class EventRecordServiceImp implements EventRecordService {
     @Override
     public AttendanceResponse scanAndRecordAttendance(String qrContent, String studentId, double userLatitude, double userLongitude) throws IOException, NotFoundException {
         if (qrContent == null || qrContent.trim().isEmpty()) {
-            throw new IllegalArgumentException("Mã QR không hợp lệ Chuỗi Base64");
+            throw new IllegalArgumentException("mã QR không hợp lệ Chuỗi Base64");
         }
         if (studentId == null || studentId.trim().isEmpty()) {
             throw new IllegalArgumentException("studentId không được để trống");
@@ -52,21 +52,21 @@ public class EventRecordServiceImp implements EventRecordService {
         long expiresAtMillis = extractExpiresAt(qrContent);
 
         QrCode qrCode = qrCodeRepository.findBySessionId(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("Mã QR không hợp lệ hoặc không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("mã QR không hợp lệ hoặc không tồn tại"));
 
         Instant now = Instant.now();
         Instant expiresAt = Instant.ofEpochMilli(expiresAtMillis);
         if (now.isAfter(expiresAt)) {
-            throw new IllegalArgumentException("Mã QR đã hết hạn");
+            throw new IllegalArgumentException("mã QR đã hết hạn");
         }
 
         double qrLatitude = qrCode.getLatitude();
         double qrLongitude = qrCode.getLongitude();
         double distance = calculateDistance(qrLatitude, qrLongitude, userLatitude, userLongitude);
-        double maxDistanceMeters = 100;
+        double maxDistanceMeters = 50;
         if (distance > maxDistanceMeters) {
             throw new IllegalArgumentException(
-                    String.format("Bạn không ở trong phạm vi điểm danh"));
+                    String.format("bạn không ở trong phạm vi điểm danh"));
         }
 
         Event event = eventRepository.findById(sessionId)
@@ -83,7 +83,7 @@ public class EventRecordServiceImp implements EventRecordService {
         if (existingEventRecord.isPresent()) {
             eventRecord = existingEventRecord.get();
             if (eventRecord.getAttendanceStatus() == AttendanceStatus.PRESENT) {
-                throw new IllegalArgumentException("Bạn đã điểm danh rồi.");
+                throw new IllegalArgumentException("bạn đã điểm danh rồi.");
             }
         } else {
             eventRecord = new EventRecord();
@@ -181,16 +181,16 @@ public class EventRecordServiceImp implements EventRecordService {
         double longitude = Double.parseDouble(lngStr);
 
         if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-            throw new IllegalArgumentException("Tọa độ không hợp lệ");
+            throw new IllegalArgumentException("tọa độ không hợp lệ");
         }
 
         double distance = calculateDistance(latitude, longitude, expectedLat, expectedLng);
         if (distance > 50) {
-            throw new IllegalArgumentException("Vị trí điểm danh quá xa (" + Math.round(distance) + "m)", null);
+            throw new IllegalArgumentException("vị trí điểm danh quá xa (" + Math.round(distance) + "m)", null);
         }
 
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sự kiện"));
+                .orElseThrow(() -> new RuntimeException("không tìm thấy sự kiện"));
 
         if (!event.getParticipantIds().contains(studentId)) {
             event.getParticipantIds().add(studentId);

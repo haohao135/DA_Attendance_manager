@@ -111,6 +111,7 @@ public class NotificationServiceImp implements NotificationService {
                             first.getTitle(),
                             first.getContent(),
                             first.getSenderId(),
+                            first.getReceivedId(),
                             first.getType(),
                             first.getCreateAt(),
                             group.size()
@@ -139,6 +140,7 @@ public class NotificationServiceImp implements NotificationService {
                             first.getTitle(),
                             first.getContent(),
                             first.getSenderId(),
+                            first.getReceivedId(),
                             first.getType(),
                             first.getCreateAt(),
                             group.size()
