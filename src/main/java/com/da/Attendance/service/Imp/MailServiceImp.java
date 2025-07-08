@@ -25,7 +25,6 @@ public class MailServiceImp implements MailService {
         message.setSubject("Mã OTP Khôi Phục Mật Khẩu");
         message.setText("Mã OTP của bạn là: " + otp +
                 "\nOTP có hiệu lực trong 5 phút." +
-                "\nThời gian hết hạn: " + formattedExpiry +
                 "\nVui lòng không chia sẻ mã này với bất kỳ ai.");
         mailSender.send(message);
     }
