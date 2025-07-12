@@ -70,7 +70,7 @@ public class AttendanceRecordServiceImp implements AttendanceRecordService {
         double qrLatitude = qrCode.getLatitude();
         double qrLongitude = qrCode.getLongitude();
         double distance = calculateDistance(qrLatitude, qrLongitude, userLatitude, userLongitude);
-        double maxDistanceMeters = 50;
+        double maxDistanceMeters = 200;
         if (distance > maxDistanceMeters) {
             throw new IllegalArgumentException(
                     String.format("bạn không ở trong phạm vi điểm danh"));
