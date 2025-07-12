@@ -63,7 +63,7 @@ public class EventRecordServiceImp implements EventRecordService {
         double qrLatitude = qrCode.getLatitude();
         double qrLongitude = qrCode.getLongitude();
         double distance = calculateDistance(qrLatitude, qrLongitude, userLatitude, userLongitude);
-        double maxDistanceMeters = 200;
+        double maxDistanceMeters = 700;
         if (distance > maxDistanceMeters) {
             throw new IllegalArgumentException(
                     String.format("bạn không ở trong phạm vi điểm danh"));
